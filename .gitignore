@@ -1,2 +1,4 @@
 .agents
+.venv
 docs
+.env

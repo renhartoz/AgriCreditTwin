@@ -1,0 +1,9 @@
+Django
+djangorestframework
+psycopg
+django-cors-headers
+PyJWT
+numpy
+python-dotenv
+cloudinary
+django-cloudinary-storage
