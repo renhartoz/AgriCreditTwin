@@ -1,6 +1,5 @@
-from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
-from django.db import connection
+from .tenant import set_tenant_schema, reset_schema
 
 
 class TenantMiddleware(MiddlewareMixin):
@@ -16,16 +15,11 @@ class TenantMiddleware(MiddlewareMixin):
 
         request.tenant = profile.tenant
         request.user_role = profile.role
-
-        schema = profile.tenant.schema_name
-        with connection.cursor() as cursor:
-            cursor.execute("SET search_path TO %s, public", [schema])
-
+        set_tenant_schema(profile.tenant.schema_name)
         return None
 
     def process_response(self, request, response):
-        with connection.cursor() as cursor:
-            cursor.execute("SET search_path TO public")
+        reset_schema()
         return response
 
 
