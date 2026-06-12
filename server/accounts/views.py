@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from django.db import IntegrityError
 from .serializers import TenantRegistrationSerializer, StaffInvitationSerializer
 from .permissions import IsAdmin
@@ -12,6 +13,17 @@ class RegisterTenantView(APIView):
     permission_classes = [AllowAny]
     serializer_class = TenantRegistrationSerializer
 
+    @extend_schema(
+        summary="Register New Cooperative (Tenant)",
+        description="Provisions an isolated PostgreSQL schema, creates the first admin user, and sets is_verified=False.",
+        request=TenantRegistrationSerializer,
+        responses={
+            201: OpenApiResponse(description="Tenant registered successfully."),
+            400: OpenApiResponse(description="Cooperative name already registered."),
+            409: OpenApiResponse(description="Duplicate NIK or email."),
+        },
+        tags=["Auth"],
+    )
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -52,6 +64,17 @@ class InviteOperatorView(APIView):
     permission_classes = [IsAdmin]
     serializer_class = StaffInvitationSerializer
 
+    @extend_schema(
+        summary="Invite Cooperative Operator",
+        description="Creates an operator user with a default password (Koperasi123!) in the current tenant schema. Returns credentials for demo purposes.",
+        request=StaffInvitationSerializer,
+        responses={
+            201: OpenApiResponse(description="Operator invited with default credentials."),
+            403: OpenApiResponse(description="Tenant context required."),
+            409: OpenApiResponse(description="Duplicate email."),
+        },
+        tags=["Auth"],
+    )
     def post(self, request):
         tenant = request.tenant
         if not tenant:

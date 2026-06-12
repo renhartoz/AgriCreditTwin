@@ -60,3 +60,45 @@ class LoanAuditSerializer(serializers.ModelSerializer):
             "id", "loan_id", "tenant_id", "officer_id",
             "field_name", "old_value", "new_value", "changed_at",
         ]
+
+
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+
+class SimulationMetricsSerializer(serializers.Serializer):
+    deficit_probability = serializers.FloatField()
+    avg_minimum_cashflow = serializers.IntegerField()
+    p5_minimum_cashflow = serializers.IntegerField()
+    iterations = serializers.IntegerField()
+
+
+class SimulationResultSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=["Surplus", "Marginal", "Deficit"])
+    recommendation = serializers.CharField()
+    rationale = serializers.CharField()
+    alternative = serializers.CharField(allow_null=True)
+    metrics = SimulationMetricsSerializer()
+
+
+class AVSResultSerializer(serializers.Serializer):
+    passed = serializers.BooleanField()
+    message = serializers.CharField(required=False)
+    flag = serializers.CharField(required=False)
+    reason = serializers.CharField(required=False)
+    regional_avg_tons_ha = serializers.FloatField(required=False)
+    threshold_tons = serializers.FloatField(required=False)
+    declared_tons = serializers.FloatField(required=False)
+
+
+class LoanApplyResponseSerializer(serializers.Serializer):
+    loan_id = serializers.UUIDField()
+    status = serializers.ChoiceField(choices=["approved", "restructured"])
+    avs = AVSResultSerializer()
+    simulation = SimulationResultSerializer()
+
+
+class LoanRejectedResponseSerializer(serializers.Serializer):
+    loan_id = serializers.UUIDField()
+    avs = AVSResultSerializer()
+    message = serializers.CharField()

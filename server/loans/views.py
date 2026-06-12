@@ -1,9 +1,16 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from accounts.permissions import IsOperatorOrAdmin, IsAuditor
 from .models import Member, Loan, LoanAuditHistory
-from .serializers import LoanApplicationSerializer, LoanAuditSerializer
+from .serializers import (
+    LoanApplicationSerializer,
+    LoanAuditSerializer,
+    LoanApplyResponseSerializer,
+    LoanRejectedResponseSerializer,
+    ErrorResponseSerializer,
+)
 from .services import validate_avs
 from simulation.services import run_monte_carlo_simulation
 
@@ -12,6 +19,35 @@ class LoanApplyView(APIView):
     permission_classes = [IsOperatorOrAdmin]
     serializer_class = LoanApplicationSerializer
 
+    @extend_schema(
+        summary="Submit Loan Application",
+        description=(
+            "Validates the declared yield against regional benchmarks (AVS), "
+            "then runs a 1,000-iteration Monte Carlo cash flow simulation to "
+            "determine loan approval or restructuring. Returns the full simulation "
+            "metrics and repayment recommendation."
+        ),
+        request=LoanApplicationSerializer,
+        responses={
+            201: OpenApiResponse(
+                response=LoanApplyResponseSerializer,
+                description="Loan approved or restructured with simulation results.",
+            ),
+            422: OpenApiResponse(
+                response=LoanRejectedResponseSerializer,
+                description="AVS red flag — yield anomaly detected, loan rejected.",
+            ),
+            403: OpenApiResponse(
+                response=ErrorResponseSerializer,
+                description="Missing tenant context.",
+            ),
+            404: OpenApiResponse(
+                response=ErrorResponseSerializer,
+                description="Member not found in this cooperative.",
+            ),
+        },
+        tags=["Loans"],
+    )
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -105,6 +141,12 @@ class AuditLoansView(APIView):
     permission_classes = [IsAuditor]
     serializer_class = LoanAuditSerializer
 
+    @extend_schema(
+        summary="Query Loan Audit Trail",
+        description="Returns immutable audit log entries filtered by loan, officer, or date range.",
+        responses={200: LoanAuditSerializer(many=True)},
+        tags=["Audit"],
+    )
     def get(self, request):
         tenant = request.tenant
         if not tenant:
