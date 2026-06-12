@@ -130,3 +130,83 @@
     @apply font-sans;
     }
 }
+
+/* ===== Auth Suite Animations ===== */
+@keyframes auth-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, -20px) scale(1.03); }
+  66% { transform: translate(-10px, 12px) scale(0.97); }
+}
+
+@keyframes auth-check-circle {
+  0% { stroke-dashoffset: 283; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes auth-check-mark {
+  0% { stroke-dashoffset: 50; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes auth-pulse-dot {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes auth-slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes auth-slide-in-left {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes auth-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Auth Card Glassmorphism ===== */
+.auth-card {
+  background: oklch(1 0 0 / 70%);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid oklch(0 0 0 / 6%);
+  box-shadow:
+    0 1px 3px oklch(0 0 0 / 4%),
+    0 8px 32px oklch(0 0 0 / 6%),
+    inset 0 1px 0 oklch(1 0 0 / 60%);
+}
+
+.dark .auth-card {
+  background: oklch(0.228 0.013 107.4 / 60%);
+  border-color: oklch(1 0 0 / 8%);
+  box-shadow:
+    0 1px 3px oklch(0 0 0 / 15%),
+    0 8px 32px oklch(0 0 0 / 25%),
+    inset 0 1px 0 oklch(1 0 0 / 5%);
+}
+
+/* ===== Corporate Theme (Investor/Auditor Portal) ===== */
+.corporate-theme {
+  --corp-bg: #0F172A;
+  --corp-card: #1E293B;
+  --corp-card-light: #334155;
+  --corp-accent: #6366F1;
+  --corp-accent-hover: #818CF8;
+  --corp-text: #F8FAFC;
+  --corp-text-muted: #94A3B8;
+  --corp-border: #334155;
+  --corp-input-bg: #1E293B;
+}
+
+.corporate-theme .corp-card {
+  background: linear-gradient(135deg, oklch(0.25 0.015 260 / 80%), oklch(0.2 0.01 260 / 70%));
+  backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid oklch(1 0 0 / 8%);
+  box-shadow:
+    0 2px 4px oklch(0 0 0 / 20%),
+    0 12px 40px oklch(0 0 0 / 30%),
+    inset 0 1px 0 oklch(1 0 0 / 5%);
+}

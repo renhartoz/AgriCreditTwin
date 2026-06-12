@@ -66,7 +66,7 @@ function CTA({ mode }) {
 
         {/* Action Button */}
         <div className="mt-4">
-          <Link to="/login">
+          <Link to={!isInvestor ? "/auth/login" : "/auth/external/register"}>
             <button 
               className={`flex items-center gap-2 font-bold px-8 py-4 text-sm sm:text-base rounded-xl transition-all shadow-md hover:scale-105 cursor-pointer ${activeBgClass}`}
             >
