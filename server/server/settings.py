@@ -26,7 +26,12 @@ INSTALLED_APPS = [
     "corsheaders",
     "cloudinary_storage",
     "cloudinary",
-    "core",
+    "tenants",
+    "accounts",
+    "loans",
+    "logistics",
+    "simulation",
+    "analytics",
 ]
 
 MIDDLEWARE = [
@@ -36,8 +41,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "core.middleware.TenantMiddleware",
-    "core.middleware.PIISanitizationMiddleware",
+    "tenants.middleware.TenantMiddleware",
+    "tenants.middleware.PIISanitizationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -113,7 +118,7 @@ from datetime import timedelta
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "TOKEN_OBTAIN_SERIALIZER": "core.jwt.CustomTokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "accounts.jwt.CustomTokenObtainPairSerializer",
 }
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
