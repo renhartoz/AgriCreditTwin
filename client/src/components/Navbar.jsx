@@ -14,7 +14,7 @@ import MobileNavbar from "./MobileNavbar";
 
 function Navbar() {
   const user = true;
-  const role = "cooperative";
+  const role = "investor";
   // cooperative
   // investor
   const navigate = useNavigate();
