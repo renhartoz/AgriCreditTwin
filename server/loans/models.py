@@ -1,62 +1,7 @@
 import uuid
 from django.db import models
 from django.conf import settings
-
-
-class Tenant(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255, unique=True)
-    schema_name = models.CharField(max_length=63, unique=True)
-    is_active = models.BooleanField(default=True)
-
-    nomor_induk_koperasi = models.CharField(
-        max_length=16, unique=True,
-        help_text="NIK Koperasi dari Kemenkop UKM",
-    )
-    sk_badan_hukum = models.CharField(
-        max_length=50,
-        help_text="Nomor SK Kemenkumham",
-    )
-    nib = models.CharField(max_length=13, blank=True, default="")
-    verification_document = models.FileField(
-        upload_to="coop_certificates/", blank=True, null=True,
-    )
-    is_verified = models.BooleanField(
-        default=False,
-        help_text="Set to True by SuperAdmin after document review",
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "tenants"
-
-    def __str__(self):
-        return self.name
-
-
-class UserProfile(models.Model):
-    ROLE_CHOICES = [
-        ("operator", "Operator"),
-        ("admin", "Admin"),
-        ("investor", "Investor"),
-        ("auditor", "Auditor"),
-    ]
-
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="profile",
-    )
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="users")
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="operator")
-    nik = models.CharField(max_length=16, blank=True, default="")
-
-    class Meta:
-        db_table = "user_profiles"
-
-    def __str__(self):
-        return f"{self.user.username} ({self.role})"
+from tenants.models import Tenant
 
 
 class Member(models.Model):
@@ -76,18 +21,6 @@ class Member(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.nik})"
-
-
-class Commodity(models.Model):
-    name = models.CharField(max_length=50, primary_key=True)
-    regional_avg_yield_tons_ha = models.DecimalField(max_digits=6, decimal_places=2)
-    avg_price_per_kg = models.IntegerField(help_text="IDR per kg")
-
-    class Meta:
-        db_table = "commodities"
-
-    def __str__(self):
-        return self.name
 
 
 class Loan(models.Model):

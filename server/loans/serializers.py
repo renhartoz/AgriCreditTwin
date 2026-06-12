@@ -1,16 +1,5 @@
 from rest_framework import serializers
-from .models import Member, Loan, Transaction, LoanAuditHistory, Tenant
-
-
-class TenantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tenant
-        fields = [
-            "id", "name", "schema_name", "is_active",
-            "nomor_induk_koperasi", "sk_badan_hukum", "nib",
-            "verification_document", "is_verified", "created_at",
-        ]
-        read_only_fields = ["is_verified"]
+from .models import Member, Loan, Transaction, LoanAuditHistory
 
 
 class MemberSerializer(serializers.ModelSerializer):
@@ -71,14 +60,3 @@ class LoanAuditSerializer(serializers.ModelSerializer):
             "id", "loan_id", "tenant_id", "officer_id",
             "field_name", "old_value", "new_value", "changed_at",
         ]
-
-
-class PortfolioSerializer(serializers.Serializer):
-    tenant_id = serializers.UUIDField()
-    tenant_name = serializers.CharField()
-    total_loans = serializers.IntegerField()
-    total_disbursed = serializers.DecimalField(max_digits=18, decimal_places=2)
-    npl_rate = serializers.FloatField()
-    data_completeness = serializers.FloatField()
-    investor_readiness_score = serializers.IntegerField()
-    loan_status_breakdown = serializers.DictField()
