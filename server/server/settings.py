@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "logistics",
     "simulation",
     "analytics",
+    "advisory",
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,5 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")

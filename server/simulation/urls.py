@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import trust_score
+from .views import TrustScoreView
 
 urlpatterns = [
-    path("members/<str:nik>/trust-score/", trust_score, name="trust-score"),
+    path("members/<str:nik>/trust-score/", TrustScoreView.as_view(), name="trust-score"),
 ]
