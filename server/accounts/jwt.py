@@ -49,8 +49,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         profile = getattr(user, "profile", None)
         if profile:
-            token["tenant_id"] = str(profile.tenant_id)
-            token["tenant_name"] = profile.tenant.name
+            token["tenant_id"] = str(profile.tenant_id) if profile.tenant_id else None
+            token["tenant_name"] = profile.tenant.name if profile.tenant else None
             token["role"] = profile.role
         else:
             token["tenant_id"] = None

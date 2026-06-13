@@ -28,6 +28,13 @@ function validateSK(sk) {
 
 
 function StepCooperativeIdentity({ data, setData }) {
+  const getBorderClass = (val, isValid) => {
+    if (!val) return 'border-border hover:border-foreground/20 focus:ring-primary/30 focus:border-primary/50';
+    return isValid 
+      ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/30' 
+      : 'border-red-400 focus:border-red-500 focus:ring-red-500/30';
+  };
+
   return (
     <div
       className="space-y-5"
@@ -55,9 +62,8 @@ function StepCooperativeIdentity({ data, setData }) {
           value={data.name}
           onChange={(e) => setData({ ...data, name: e.target.value })}
           placeholder="Koperasi Tani Sejahtera"
-          className="w-full h-11 px-4 rounded-xl border border-border bg-background text-sm
-            transition-all duration-200 hover:border-foreground/20
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
+          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm transition-all duration-200 focus:outline-none focus:ring-2
+            ${getBorderClass(data.name, data.name.trim().length > 0)}`}
         />
       </div>
 
@@ -77,10 +83,8 @@ function StepCooperativeIdentity({ data, setData }) {
           }}
           placeholder="Masukkan 13-16 digit NIK"
           maxLength={16}
-          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm
-            transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50
-            ${data.nik && !validateNIK(data.nik) ? 'border-red-300' : 'border-border hover:border-foreground/20'}`}
+          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm transition-all duration-200 focus:outline-none focus:ring-2
+            ${getBorderClass(data.nik, validateNIK(data.nik))}`}
         />
         {data.nik && !validateNIK(data.nik) && (
           <p className="text-xs text-red-500">NIK harus terdiri dari 13-16 digit angka</p>
@@ -103,10 +107,8 @@ function StepCooperativeIdentity({ data, setData }) {
           }}
           placeholder="Masukkan 13 digit NIB"
           maxLength={13}
-          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm
-            transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50
-            ${data.nib && !validateNIB(data.nib) ? 'border-red-300' : 'border-border hover:border-foreground/20'}`}
+          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm transition-all duration-200 focus:outline-none focus:ring-2
+            ${getBorderClass(data.nib, validateNIB(data.nib))}`}
         />
         {data.nib && !validateNIB(data.nib) && (
           <p className="text-xs text-red-500">NIB harus terdiri dari 13 digit angka</p>
@@ -124,10 +126,12 @@ function StepCooperativeIdentity({ data, setData }) {
           value={data.skNumber}
           onChange={(e) => setData({ ...data, skNumber: e.target.value })}
           placeholder="AHU-000000.AH.01.XX.Tahun"
-          className="w-full h-11 px-4 rounded-xl border border-border bg-background text-sm
-            transition-all duration-200 hover:border-foreground/20
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
+          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm transition-all duration-200 focus:outline-none focus:ring-2
+            ${getBorderClass(data.skNumber, validateSK(data.skNumber))}`}
         />
+        {data.skNumber && !validateSK(data.skNumber) && (
+          <p className="text-xs text-red-500">Nomor SK minimal 5 karakter</p>
+        )}
       </div>
 
       
@@ -169,10 +173,12 @@ function StepAdminAccount({ data, setData }) {
           value={data.email}
           onChange={(e) => setData({ ...data, email: e.target.value })}
           placeholder="admin@gmail.com"
-          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm
-            transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50
-            ${data.email && !validateEmail(data.email) ? 'border-red-300' : 'border-border hover:border-foreground/20'}`}
+          className={`w-full h-11 px-4 rounded-xl border bg-background text-sm transition-all duration-200 focus:outline-none focus:ring-2
+            ${!data.email 
+              ? 'border-border hover:border-foreground/20 focus:ring-primary/30 focus:border-primary/50' 
+              : validateEmail(data.email) 
+                ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/30' 
+                : 'border-red-400 focus:border-red-500 focus:ring-red-500/30'}`}
         />
         {data.email && !validateEmail(data.email) && (
           <p className="text-xs text-red-500">Format email tidak valid</p>
@@ -186,6 +192,7 @@ function StepAdminAccount({ data, setData }) {
         value={data.password}
         onChange={(e) => setData({ ...data, password: e.target.value })}
         showStrength
+        valid={data.password.length >= 8}
       />
 
       
@@ -194,6 +201,7 @@ function StepAdminAccount({ data, setData }) {
         label={<>Konfirmasi Password <span className="text-red-400">*</span></>}
         value={data.confirmPassword}
         onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
+        valid={data.confirmPassword.length >= 8 && data.password === data.confirmPassword}
         error={
           data.confirmPassword && data.password !== data.confirmPassword
             ? 'Password tidak cocok'

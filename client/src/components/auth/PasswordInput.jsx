@@ -24,6 +24,7 @@ export default function PasswordInput({
   placeholder = '••••••••',
   showStrength = false,
   error = '',
+  valid = false,
   className = '',
 }) {
   const [visible, setVisible] = useState(false);
@@ -45,11 +46,12 @@ export default function PasswordInput({
           placeholder={placeholder}
           autoComplete="new-password"
           className={`w-full h-11 px-4 pr-11 rounded-xl border bg-background text-sm
-            transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50
+            transition-all duration-200 focus:outline-none focus:ring-2
             ${error
-              ? 'border-red-400 focus:ring-red-300/30 focus:border-red-400'
-              : 'border-border hover:border-foreground/20'
+              ? 'border-red-400 focus:ring-red-500/30 focus:border-red-500'
+              : valid
+                ? 'border-emerald-500 focus:ring-emerald-500/30 focus:border-emerald-500'
+                : 'border-border hover:border-foreground/20 focus:ring-primary/30 focus:border-primary/50'
             }`}
         />
         <button
