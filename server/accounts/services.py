@@ -6,7 +6,7 @@ from .models import UserProfile
 
 
 @transaction.atomic
-def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, email, password):
+def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, email, password, nib="", verification_document=None):
     schema_name = sanitize_schema_name(coop_name)
 
     if Tenant.objects.filter(name=coop_name).exists():
@@ -22,6 +22,8 @@ def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, e
         schema_name=schema_name,
         nomor_induk_koperasi=nomor_induk_koperasi,
         sk_badan_hukum=sk_badan_hukum,
+        nib=nib,
+        verification_document=verification_document,
         is_verified=False,
     )
 

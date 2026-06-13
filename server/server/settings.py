@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     "logistics",
     "simulation",
     "analytics",
+    "advisory",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -109,8 +111,18 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 50,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Agri-Credit Twin API",
+    "DESCRIPTION": "Multi-tenant agricultural credit scoring with Monte Carlo simulation, AVS verification, cross-tenant trust scoring, and LLM-powered loan advisory.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": "/api",
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 from datetime import timedelta
@@ -122,3 +134,5 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")

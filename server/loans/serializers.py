@@ -17,6 +17,14 @@ class LoanApplicationSerializer(serializers.Serializer):
     tenor_months = serializers.IntegerField(min_value=1, max_value=60)
     declared_yield_tons = serializers.DecimalField(max_digits=8, decimal_places=2)
     commodity = serializers.CharField(max_length=50, default="rice")
+    land_area_ha = serializers.DecimalField(
+        max_digits=8, decimal_places=2,
+        help_text="Cultivated land area in hectares for this loan cycle.",
+    )
+    estimated_grain_price = serializers.DecimalField(
+        max_digits=12, decimal_places=2,
+        help_text="Expected selling price per kg (IDR). Overrides static commodity price in simulation.",
+    )
     planting_month = serializers.IntegerField(min_value=1, max_value=12)
     harvest_month = serializers.IntegerField(min_value=1, max_value=12)
     monthly_living_cost = serializers.DecimalField(
@@ -60,3 +68,45 @@ class LoanAuditSerializer(serializers.ModelSerializer):
             "id", "loan_id", "tenant_id", "officer_id",
             "field_name", "old_value", "new_value", "changed_at",
         ]
+
+
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+
+class SimulationMetricsSerializer(serializers.Serializer):
+    deficit_probability = serializers.FloatField()
+    avg_minimum_cashflow = serializers.IntegerField()
+    p5_minimum_cashflow = serializers.IntegerField()
+    iterations = serializers.IntegerField()
+
+
+class SimulationResultSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=["Surplus", "Marginal", "Deficit"])
+    recommendation = serializers.CharField()
+    rationale = serializers.CharField()
+    alternative = serializers.CharField(allow_null=True)
+    metrics = SimulationMetricsSerializer()
+
+
+class AVSResultSerializer(serializers.Serializer):
+    passed = serializers.BooleanField()
+    message = serializers.CharField(required=False)
+    flag = serializers.CharField(required=False)
+    reason = serializers.CharField(required=False)
+    regional_avg_tons_ha = serializers.FloatField(required=False)
+    threshold_tons = serializers.FloatField(required=False)
+    declared_tons = serializers.FloatField(required=False)
+
+
+class LoanApplyResponseSerializer(serializers.Serializer):
+    loan_id = serializers.UUIDField()
+    status = serializers.ChoiceField(choices=["approved", "restructured"])
+    avs = AVSResultSerializer()
+    simulation = SimulationResultSerializer()
+
+
+class LoanRejectedResponseSerializer(serializers.Serializer):
+    loan_id = serializers.UUIDField()
+    avs = AVSResultSerializer()
+    message = serializers.CharField()
