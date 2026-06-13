@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -6,7 +7,7 @@ import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env()
+env = environ.Env(os.path.join(BASE_DIR, '.env'))
 environ.Env.read_env()
 
 SECRET_KEY = env("SECRET_KEY")
