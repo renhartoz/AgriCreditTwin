@@ -12,7 +12,15 @@ class HighRiskLoanSerializer(serializers.Serializer):
 
 class RecentLogSerializer(serializers.Serializer):
     time = serializers.CharField()
+    type = serializers.CharField()
     text = serializers.CharField()
+
+
+class TopCommoditySerializer(serializers.Serializer):
+    name = serializers.CharField()
+    volume = serializers.FloatField()
+    unit = serializers.CharField()
+    value = serializers.FloatField()
 
 
 class PortfolioSerializer(serializers.Serializer):
@@ -29,3 +37,5 @@ class PortfolioSerializer(serializers.Serializer):
     total_savings = serializers.DecimalField(max_digits=18, decimal_places=2)
     high_risk_loans = HighRiskLoanSerializer(many=True)
     recent_logs = RecentLogSerializer(many=True)
+    top_commodities = TopCommoditySerializer(many=True)
+    total_asset_valuation = serializers.DecimalField(max_digits=18, decimal_places=2)

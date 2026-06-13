@@ -12,6 +12,8 @@ import {
   Clock,
   Link2
 } from 'lucide-react'
+import { useEffect } from 'react'
+import { getOperators, inviteOperator } from '../services/loanService.js'
 
 const ROLE_OPTIONS = [
   { value: 'operator', label: 'Operator Lapangan', desc: 'Petugas survei lahan & input data harian' }
@@ -33,11 +35,30 @@ function InviteOperator() {
   const [generatedLink, setGeneratedLink] = useState('')
   const [linkCopied, setLinkCopied] = useState(false)
 
-  const [invitedMembers, setInvitedMembers] = useState([
-    { id: 1, name: 'Ahmad Dahlan', email: 'ahmad.dahlan@koperasi.co.id', role: 'Operator Lapangan', status: 'active', invitedAt: '2026-06-10' },
-    { id: 2, name: 'Hendra Gunawan', email: 'hendra.g@koperasi.co.id', role: 'Operator Lapangan', status: 'pending', invitedAt: '2026-06-12' },
-    { id: 3, name: 'Siti Nurhaliza', email: 'siti.n@koperasi.co.id', role: 'Admin Koperasi', status: 'active', invitedAt: '2026-05-28' }
-  ])
+  const [invitedMembers, setInvitedMembers] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadOperators() {
+      try {
+        const data = await getOperators()
+        if (!cancelled) {
+          setInvitedMembers(data.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role === 'operator' ? 'Operator Lapangan' : 'Admin Koperasi',
+            status: user.is_active ? 'active' : 'pending',
+            invitedAt: user.joined_at
+          })))
+        }
+      } catch (err) {
+        console.error('Failed to load operators', err)
+      }
+    }
+    loadOperators()
+    return () => { cancelled = true }
+  }, [])
 
   const validateEmail = (val) => {
     if (!val.trim()) return 'Email wajib diisi.'
@@ -47,7 +68,7 @@ function InviteOperator() {
     return ''
   }
 
-  const handleSendInvite = () => {
+  const handleSendInvite = async () => {
     setNameError('')
     setEmailError('')
     let hasError = false
@@ -67,11 +88,18 @@ function InviteOperator() {
 
     setIsSending(true)
 
-    setTimeout(() => {
+    try {
+      const response = await inviteOperator({
+        name: name.trim(),
+        email: email.trim(),
+      })
+
       const selectedRole = ROLE_OPTIONS.find(r => r.value === role)
       const roleName = selectedRole ? selectedRole.label : 'Operator Lapangan'
+      
+      // Setup URL uses the returned default password logic implicitly if sent via email, 
+      // but if we show it on screen, we can pass it (or not)
       const link = `${window.location.origin}/auth/setup-password?email=${encodeURIComponent(email.trim())}&coop=${encodeURIComponent(cooperativeName)}&role=${encodeURIComponent(roleName)}`
-
       setGeneratedLink(link)
 
       const newMember = {
@@ -87,11 +115,17 @@ function InviteOperator() {
       setName('')
       setEmail('')
       setRole('operator')
-      setIsSending(false)
-      setToastMessage(`Undangan berhasil dikirim ke ${newMember.email}`)
+      setToastMessage(`Undangan berhasil dikirim ke ${email.trim()}`)
       setToast(true)
       setTimeout(() => setToast(false), 4000)
-    }, 800)
+    } catch (err) {
+      const errMsg = err.response?.data?.error || 'Gagal mengirim undangan'
+      setToastMessage(errMsg)
+      setToast(true)
+      setTimeout(() => setToast(false), 4000)
+    } finally {
+      setIsSending(false)
+    }
   }
 
   const handleCopyLink = () => {

@@ -20,7 +20,7 @@ import {
   Plus,
   Scale
 } from 'lucide-react'
-import { applyLoan, getMembers } from '../services/loanService.js'
+import { applyLoan, getMembers, getCommodities, getCommodityLogs, recordCommodityLog } from '../services/loanService.js'
 
 
 const MOCK_MEMBERS = []
@@ -55,18 +55,7 @@ const TRANSACTION_TYPES = [
   { value: 'rice_purchase', label: 'Pembelian Beras (Komoditas Masuk)' }
 ]
 
-const MOCK_COMMODITIES = [
-  'Beras Premium',
-  'Beras Medium',
-  'Gabah Kering Panen (GKP)',
-  'Gabah Kering Giling (GKG)',
-  'Jagung Pipil',
-  'Kedelai Lokal',
-  'Pupuk Urea',
-  'Pupuk NPK',
-  'Pestisida Cair',
-  'Benih Padi Ciherang'
-]
+const MOCK_COMMODITIES = []
 
 const UNIT_OPTIONS = [
   { value: 'kg', label: 'Kilogram (Kg)' },
@@ -351,6 +340,7 @@ function DataEntry() {
 
   const [members, setMembers] = useState([])
   const [membersLoading, setMembersLoading] = useState(true)
+  const [commodities, setCommodities] = useState([])
 
   useEffect(() => {
     let cancelled = false
@@ -371,7 +361,35 @@ function DataEntry() {
         if (!cancelled) setMembersLoading(false)
       }
     }
+    async function fetchCommodities() {
+      try {
+        const data = await getCommodities()
+        if (!cancelled) setCommodities(data.map(c => c.name))
+      } catch {
+        if (!cancelled) setCommodities([])
+      }
+    }
+    async function fetchInventoryLogs() {
+      try {
+        const data = await getCommodityLogs()
+        if (!cancelled) {
+          setRecentInventory(data.map(l => ({
+            id: l.id,
+            commodity: l.commodity_name,
+            type: l.movement_type === 'IN' ? 'masuk' : 'keluar',
+            qty: parseFloat(l.quantity_kg),
+            unit: 'kg',
+            date: typeof l.logged_at === 'string' ? l.logged_at.split('T')[0] : l.logged_at,
+            desc: l.description || ''
+          })))
+        }
+      } catch {
+        // fall back to local state
+      }
+    }
     fetchMembers()
+    fetchCommodities()
+    fetchInventoryLogs()
     return () => { cancelled = true }
   }, [])
 
@@ -428,7 +446,7 @@ function DataEntry() {
   const activeContracts = selectedMember ? (MOCK_LOAN_CONTRACTS[selectedMember.id] || []) : []
 
   
-  const handleSaveInventory = () => {
+  const handleSaveInventory = async () => {
     setCommodityError('')
     setQuantityError('')
     let hasError = false
@@ -447,31 +465,42 @@ function DataEntry() {
 
     setIsSavingInventory(true)
 
-    setTimeout(() => {
-      const newItem = {
-        id: Date.now(),
-        commodity: commodityName.trim(),
-        type: mutationType,
-        qty: parseFloat(quantity),
-        unit: unitOfMeasurement,
-        date: inventoryDate,
-        desc: inventoryDescription.trim() || 'Dicatat via formulir mutasi barang'
+    try {
+      const payload = {
+        commodity_name: commodityName.trim(),
+        movement_type: mutationType === 'masuk' ? 'IN' : 'OUT',
+        quantity_kg: parseFloat(quantity),
+        description: inventoryDescription.trim() || 'Dicatat via formulir mutasi barang',
+        logged_at: inventoryDate,
       }
+      const saved = await recordCommodityLog(payload)
+      const newItem = {
+        id: saved.id,
+        commodity: saved.commodity_name,
+        type: saved.movement_type === 'IN' ? 'masuk' : 'keluar',
+        qty: parseFloat(saved.quantity_kg),
+        unit: 'kg',
+        date: typeof saved.logged_at === 'string' ? saved.logged_at.split('T')[0] : saved.logged_at,
+        desc: saved.description || ''
+      }
+      setRecentInventory(prev => [newItem, ...prev].slice(0, 20))
+      if (!commodities.includes(commodityName.trim())) {
+        setCommodities(prev => [...prev, commodityName.trim()])
+      }
+      setToastMessage('Mutasi barang berhasil disimpan ke database koperasi!')
+    } catch {
+      setToastMessage('Gagal menyimpan ke server. Periksa koneksi.')
+    }
 
-      setRecentInventory(prev => [newItem, ...prev].slice(0, 8))
-
-      setCommodityName('')
-      setQuantity('')
-      setInventoryDescription('')
-      setInventoryDate(todayISO())
-      setMutationType('masuk')
-      setUnitOfMeasurement('kg')
-
-      setIsSavingInventory(false)
-      setToastMessage('Mutasi barang berhasil dicatat ke dalam buku gudang koperasi!')
-      setSavedToast(true)
-      setTimeout(() => setSavedToast(false), 3000)
-    }, 600)
+    setCommodityName('')
+    setQuantity('')
+    setInventoryDescription('')
+    setInventoryDate(todayISO())
+    setMutationType('masuk')
+    setUnitOfMeasurement('kg')
+    setIsSavingInventory(false)
+    setSavedToast(true)
+    setTimeout(() => setSavedToast(false), 3500)
   }
 
   
@@ -748,7 +777,7 @@ function DataEntry() {
                             setCommodityName(val)
                             setCommodityError('')
                           }}
-                          commodities={MOCK_COMMODITIES}
+                          commodities={commodities}
                           error={!!commodityError}
                         />
                         {commodityError && (

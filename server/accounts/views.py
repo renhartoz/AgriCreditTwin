@@ -244,3 +244,33 @@ class VerifyEmailView(APIView):
             {"message": "Account activated successfully. You may now log in."},
             status=status.HTTP_200_OK,
         )
+
+
+class OperatorListView(APIView):
+    permission_classes = [IsAdmin]
+
+    @extend_schema(
+        summary="List Tenant Team Members",
+        description="Returns all users (operators and admins) registered under the current tenant.",
+        tags=["Auth"],
+    )
+    def get(self, request):
+        tenant = request.tenant
+        if not tenant:
+            return Response({"error": "Tenant context required."}, status=status.HTTP_403_FORBIDDEN)
+
+        from .models import UserProfile
+        profiles = UserProfile.objects.filter(tenant=tenant).select_related("user").order_by("role", "user__date_joined")
+        result = []
+        for profile in profiles:
+            result.append({
+                "id": profile.user.id,
+                "name": profile.user.get_full_name() or profile.user.username,
+                "email": profile.user.email,
+                "username": profile.user.username,
+                "role": profile.role,
+                "is_active": profile.user.is_active,
+                "joined_at": profile.user.date_joined.strftime("%Y-%m-%d"),
+            })
+        return Response(result)
+

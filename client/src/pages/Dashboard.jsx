@@ -43,6 +43,9 @@ function Dashboard() {
   const [totalSavings, setTotalSavings] = useState(0)
   const [highRiskLoans, setHighRiskLoans] = useState([])
   const [recentLogs, setRecentLogs] = useState([])
+  
+  const [totalAssetValuation, setTotalAssetValuation] = useState(0)
+  const [topCommodities, setTopCommodities] = useState([])
 
   useEffect(() => {
     let cancelled = false
@@ -66,6 +69,8 @@ function Dashboard() {
         }
         if (Array.isArray(data.high_risk_loans)) setHighRiskLoans(data.high_risk_loans)
         if (Array.isArray(data.recent_logs)) setRecentLogs(data.recent_logs)
+        if (data.total_asset_valuation != null) setTotalAssetValuation(parseFloat(data.total_asset_valuation))
+        if (Array.isArray(data.top_commodities)) setTopCommodities(data.top_commodities)
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to fetch portfolio:', err)
@@ -103,15 +108,7 @@ function Dashboard() {
     { month: 'Jun', NPL: 18.2, Baseline: 22.0 }
   ]
 
-  const totalAssetValuation = 847250000
   const assetGrowth = '+12.4%'
-  const topCommodities = [
-    { name: 'Kayu Jati', volume: 450, unit: 'm³', value: 3825000000 },
-    { name: 'Pupuk Urea', volume: 12, unit: 'Ton', value: 33600000 },
-    { name: 'Gabah Kering Giling', volume: 4.5, unit: 'Ton', value: 2925000 },
-    { name: 'Beras Premium', volume: 1.2, unit: 'Ton', value: 17400000 },
-    { name: 'Jagung Pipilan', volume: 3.8, unit: 'Ton', value: 19000000 }
-  ]
   const topCommoditiesChart = topCommodities.map(c => ({
     name: c.name,
     volume: c.volume
@@ -151,10 +148,25 @@ function Dashboard() {
         )
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200 uppercase tracking-wider text-[10px]">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-400 border border-slate-200 dark:border-slate-800 uppercase tracking-wider text-[10px]">
             {status}
           </span>
         )
+    }
+  }
+
+  const getLogColor = (type) => {
+    switch (type) {
+      case 'operator':
+        return 'bg-blue-500'
+      case 'logistik':
+        return 'bg-amber-500'
+      case 'transaksi':
+        return 'bg-emerald-500'
+      case 'sistem':
+        return 'bg-purple-500'
+      default:
+        return 'bg-slate-400'
     }
   }
 
@@ -498,13 +510,31 @@ function Dashboard() {
               <FileText className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Aktivitas Lapangan Terbaru</h3>
             </div>
+            <div className="flex flex-wrap gap-4 mb-6">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                Operator
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                Logistik
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                Transaksi
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                Sistem
+              </div>
+            </div>
             <div className="relative border-l border-slate-200 dark:border-slate-800 pl-4 ml-2 space-y-6 py-2">
               {recentLogs.length === 0 && (
                 <p className="text-sm text-slate-400 dark:text-slate-500 py-4">Belum ada aktivitas tercatat.</p>
               )}
               {recentLogs.map((log, idx) => (
                 <div key={idx} className="relative group">
-                  <div className="absolute -left-[21px] mt-1.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-600 group-hover:scale-110 transition-transform shadow-xs" />
+                  <div className={`absolute -left-[21px] mt-1.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${getLogColor(log.type)} group-hover:scale-110 transition-transform shadow-xs`} />
                   <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 block">{log.time}</span>
                   <p className="text-sm text-slate-650 dark:text-slate-405 mt-1 leading-relaxed">{log.text}</p>
                 </div>
