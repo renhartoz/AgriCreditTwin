@@ -8,7 +8,6 @@ import {
   Award,
   ChevronDown,
   Check,
-  Lock,
   FileSpreadsheet,
   Activity,
   ArrowUpRight,
@@ -584,12 +583,6 @@ function Analytics() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-450 text-xs font-semibold">
-              <Lock className="w-3.5 h-3.5" />
-              <span>Agregat Anonim (Tanpa NIK/KTP)</span>
-            </div>
-
             
             <div className="relative">
               <button

@@ -644,7 +644,7 @@ function RiskDashboard() {
                   <XAxis dataKey="month" stroke="#94a3b8" tick={{ fontSize: 10, fontWeight: 500 }} />
                   <YAxis stroke="#94a3b8" tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} width={45} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="pd" stroke="none" fill="url(#pdGradient)" />
+                  <Area type="monotone" dataKey="pd" name="PD" stroke="none" fill="url(#pdGradient)" />
                   <Line
                     type="monotone"
                     dataKey="pd"
@@ -652,7 +652,7 @@ function RiskDashboard() {
                     strokeWidth={2.5}
                     dot={{ stroke: risk.chartColor, strokeWidth: 2, r: 3, fill: '#fff' }}
                     activeDot={{ r: 5, strokeWidth: 2 }}
-                    name="PD (%)"
+                    name="Probabilitas Gagal Bayar (%)"
                   />
                   <ReferenceLine y={5} stroke="#10b981" strokeDasharray="3 3" strokeWidth={1.5}>
                   </ReferenceLine>
