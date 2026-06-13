@@ -133,14 +133,6 @@ function StepCooperativeIdentity({ data, setData }) {
           <p className="text-xs text-red-500">Nomor SK minimal 5 karakter</p>
         )}
       </div>
-
-      
-      <FileUploader
-        id="coop-certificate"
-        label={<>Sertifikat Koperasi <span className="text-red-400">*</span></>}
-        value={data.certificate}
-        onChange={(file) => setData({ ...data, certificate: file })}
-      />
     </div>
   );
 }
@@ -235,9 +227,8 @@ export default function RegisterCooperative() {
       data.name.trim().length > 0 &&
       validateNIK(data.nik) &&
       validateNIB(data.nib) &&
-      validateSK(data.skNumber) &&
-      data.certificate !== null,
-    [data.name, data.nik, data.nib, data.skNumber, data.certificate]
+      validateSK(data.skNumber),
+    [data.name, data.nik, data.nib, data.skNumber]
   );
 
   const step2Valid = useMemo(
@@ -260,7 +251,9 @@ export default function RegisterCooperative() {
       formData.append('nomor_induk_koperasi', data.nik);
       formData.append('sk_badan_hukum', data.skNumber);
       formData.append('nib', data.nib);
-      formData.append('verification_document', data.certificate);
+      if (data.certificate) {
+        formData.append('verification_document', data.certificate);
+      }
       formData.append('username', data.email.split('@')[0]);
       formData.append('email', data.email);
       formData.append('password', data.password);

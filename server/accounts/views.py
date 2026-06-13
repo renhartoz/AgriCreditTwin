@@ -53,7 +53,7 @@ class RegisterTenantView(APIView):
                 nomor_induk_koperasi=data["nomor_induk_koperasi"],
                 sk_badan_hukum=data["sk_badan_hukum"],
                 nib=data.get("nib", ""),
-                verification_document=data["verification_document"],
+                verification_document=data.get("verification_document"),
                 username=data["username"],
                 email=data["email"],
                 password=data["password"],
