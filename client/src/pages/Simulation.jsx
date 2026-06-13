@@ -244,7 +244,7 @@ const calculateSimulation = ({
 
   if (probabilityOfDefault < 5) {
     riskLevel = 'LOW'
-    recommendationText = 'PROPOSAL DISETUJUI: Koridor arus kas sangat aman. Proyeksi stokastik menunjukkan kapasitas pembayaran kembali yang kuat (PD rendah).'
+    recommendationText = 'PROPOSAL DISETUJUI: Rentang Prediksi arus kas sangat aman. Proyeksi stokastik menunjukkan kapasitas pembayaran kembali yang kuat (PD rendah).'
     recommendationColor = 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-300'
   } else if (probabilityOfDefault <= 15) {
     riskLevel = 'WARNING'
@@ -638,7 +638,7 @@ function Simulation() {
               <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg">
-                    Koridor Proyeksi Arus Kas
+                    Rentang Prediksi Proyeksi Arus Kas
                   </h3>
                   <p className="text-xs text-slate-400 dark:text-slate-500">
                     Simulasi Kemampuan Bayar Digital
@@ -726,7 +726,7 @@ function Simulation() {
                           strokeWidth={2}
                           strokeDasharray="4 4"
                           dot={false}
-                          name="Koridor Optimis (P90)"
+                          name="Rentang Prediksi Optimis (P90)"
                         />
 
                         
@@ -737,7 +737,7 @@ function Simulation() {
                           strokeWidth={2}
                           strokeDasharray="4 4"
                           dot={false}
-                          name="Koridor Pesimis (P10)"
+                          name="Rentang Prediksi Pesimis (P10)"
                         />
 
                         
