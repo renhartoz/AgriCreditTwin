@@ -7,7 +7,7 @@ const ACCEPTED_TYPES = {
   'image/png': { label: 'PNG', icon: Image },
 };
 
-const MAX_SIZE = 5 * 1024 * 1024; 
+const MAX_SIZE = 10 * 1024 * 1024; 
 
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -26,7 +26,7 @@ export default function FileUploader({ id, label, value, onChange, error: extern
       return false;
     }
     if (file.size > MAX_SIZE) {
-      setError(`Ukuran file terlalu besar. Maksimum 5MB (file Anda: ${formatSize(file.size)}).`);
+      setError(`Ukuran file terlalu besar. Maksimum 10MB (file Anda: ${formatSize(file.size)}).`);
       return false;
     }
     setError('');
@@ -118,7 +118,7 @@ export default function FileUploader({ id, label, value, onChange, error: extern
               {dragActive ? 'Lepas file di sini...' : 'Seret & lepas file, atau klik untuk memilih'}
             </p>
             <p className="text-xs text-muted-foreground">
-              PDF, JPG, PNG • Maks. 5MB
+              PDF, JPG, PNG • Maks. 10MB
             </p>
           </div>
           <input

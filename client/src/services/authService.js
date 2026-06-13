@@ -55,9 +55,7 @@ export const authService = {
   },
 
   async registerTenant(formData) {
-    const { data } = await api.post('/auth/register-tenant/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post('/auth/register-tenant/', formData);
     return data;
   },
 
