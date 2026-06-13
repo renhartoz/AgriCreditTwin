@@ -12,9 +12,7 @@ import MobileNavbar from "./MobileNavbar";
 
 function Navbar() {
   const user = true;
-  const role = "cooperative";
-  
-  
+  const role = "auditor";
   
   const location = useLocation();
 
