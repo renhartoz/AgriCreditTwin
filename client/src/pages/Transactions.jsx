@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   X,
@@ -11,6 +11,7 @@ import {
   FileText,
   Undo2
 } from 'lucide-react'
+import { getAuditTrail } from '../services/loanService.js'
 
 
 const INITIAL_TRANSACTIONS = [
@@ -153,6 +154,45 @@ function Transactions() {
   const [proximityFilter, setProximityFilter] = useState("all");
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isSlideOpen, setIsSlideOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchTrail() {
+      try {
+        setLoading(true)
+        const data = await getAuditTrail()
+        if (cancelled) return
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map(item => ({
+            loanId: item.loan_id || '',
+            createdAt: item.changed_at || null,
+            changedAt: item.changed_at || null,
+            disbursedAt: null,
+            transactionCreatedAt: null,
+            transactionType: null,
+            avsFlag: false,
+            fieldName: item.field_name || '',
+            oldValue: item.old_value || '',
+            newValue: item.new_value || '',
+            officerId: item.officer_id ? String(item.officer_id) : '',
+            status: 'disbursed'
+          }))
+          setTransactions(mapped)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to fetch audit trail:', err)
+          setFetchError('Gagal memuat audit trail. Menggunakan data sementara.')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    fetchTrail()
+    return () => { cancelled = true }
+  }, [])
 
   
   const computedTransactions = useMemo(() => {
@@ -213,6 +253,19 @@ function Transactions() {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
+
+        {loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-400 text-xs font-semibold">
+            <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+            Memuat data audit trail dari server...
+          </div>
+        )}
+        {fetchError && !loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+            <AlertCircle className="w-4 h-4" />
+            {fetchError}
+          </div>
+        )}
 
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">

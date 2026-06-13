@@ -19,6 +19,7 @@ class Tenant(models.Model):
     nib = models.CharField(max_length=13, blank=True, default="")
     verification_document = models.FileField(
         upload_to="coop_certificates/", blank=True, null=True,
+        max_length=500,
     )
     is_verified = models.BooleanField(
         default=False,

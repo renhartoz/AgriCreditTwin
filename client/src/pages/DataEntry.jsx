@@ -20,17 +20,10 @@ import {
   Plus,
   Scale
 } from 'lucide-react'
+import { applyLoan, getMembers } from '../services/loanService.js'
 
 
-const MOCK_MEMBERS = [
-  { id: 'M-10023', name: 'Ahmad Dahlan', phone: '0812-3456-7890', group: 'Koptan Agro Makmur' },
-  { id: 'M-10045', name: 'Dewi Sri Wahyuni', phone: '0813-9876-5432', group: 'Koptan Subur Jaya' },
-  { id: 'M-20108', name: 'Bambang Triyono', phone: '0821-4567-8901', group: 'Koptan Agro Makmur' },
-  { id: 'M-20119', name: 'Siti Aminah', phone: '0857-1234-5678', group: 'Koptan Tani Mandiri' },
-  { id: 'M-30064', name: 'Joko Susilo', phone: '0878-5555-4321', group: 'Koptan Subur Jaya' },
-  { id: 'M-30112', name: 'I Made Suarta', phone: '0819-2233-4455', group: 'Koptan Tani Mandiri' },
-  { id: 'M-40089', name: 'Hasan Basri', phone: '0811-3344-5566', group: 'Koptan Agro Makmur' }
-]
+const MOCK_MEMBERS = []
 
 const MOCK_LOAN_CONTRACTS = {
   'M-10023': [
@@ -355,7 +348,33 @@ function CommoditySmartCombobox({ value, onChange, commodities, error }) {
 
 
 function DataEntry() {
-  
+
+  const [members, setMembers] = useState([])
+  const [membersLoading, setMembersLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchMembers() {
+      try {
+        const data = await getMembers()
+        if (!cancelled) {
+          setMembers(data.map(m => ({
+            id: m.id,
+            name: m.name,
+            phone: m.phone || '',
+            group: m.commodity || ''
+          })))
+        }
+      } catch {
+        if (!cancelled) setMembers([])
+      } finally {
+        if (!cancelled) setMembersLoading(false)
+      }
+    }
+    fetchMembers()
+    return () => { cancelled = true }
+  }, [])
+
   const [activeTab, setActiveTab] = useState('inventory')
 
   
@@ -501,7 +520,7 @@ function DataEntry() {
     }
   }
 
-  const handleSaveTransaction = () => {
+  const handleSaveTransaction = async () => {
     setMemberError('')
     setTypeError('')
     setLoanError('')
@@ -534,8 +553,58 @@ function DataEntry() {
 
     setIsSaving(true)
 
+    const cleanAmount = parseInt(rawAmount.replace(/\D/g, ''), 10)
+
+    if (transactionType === 'loan_disbursement' && selectedMember) {
+      try {
+        const loanPayload = {
+          member_id: selectedMember.id,
+          amount: cleanAmount,
+          tenor_months: 12,
+          declared_yield_tons: 5.0,
+          commodity: 'rice',
+          land_area_ha: 1.0,
+          estimated_grain_price: 6500,
+          planting_month: new Date().getMonth() + 1,
+          harvest_month: ((new Date().getMonth() + 4) % 12) + 1,
+          monthly_living_cost: 2000000,
+          monthly_farming_cost: 500000
+        }
+        const result = await applyLoan(loanPayload)
+
+        const newTransaction = {
+          id: result.loan_id || Date.now(),
+          member: { id: selectedMember.id, name: selectedMember.name },
+          type: transactionType,
+          amount: cleanAmount,
+          loanId: result.loan_id || null,
+          date: transactionDate,
+          description: `Status: ${result.status} | AVS: ${result.avs?.passed ? 'Lolos' : 'Gagal'}`
+        }
+
+        setRecentTransactions((prev) => [newTransaction, ...prev].slice(0, 8))
+        setSelectedMember(null)
+        setTransactionType('')
+        setSelectedLoan('')
+        setRawAmount('')
+        setDescription('')
+        setTransactionDate(todayISO())
+
+        setIsSaving(false)
+        setToastMessage(`Pinjaman ${result.status === 'approved' ? 'disetujui' : 'diproses'}! ID: ${result.loan_id}`)
+        setSavedToast(true)
+        setTimeout(() => setSavedToast(false), 4000)
+        return
+      } catch (err) {
+        console.error('Loan application failed:', err)
+        setIsSaving(false)
+        setToastMessage('Gagal mengirim ke server. Data disimpan secara lokal.')
+        setSavedToast(true)
+        setTimeout(() => setSavedToast(false), 3000)
+      }
+    }
+
     setTimeout(() => {
-      const cleanAmount = parseInt(rawAmount.replace(/\D/g, ''), 10)
       const newTransaction = {
         id: Date.now(),
         member: { id: selectedMember.id, name: selectedMember.name },
@@ -952,7 +1021,7 @@ function DataEntry() {
                           setSelectedLoan('')
                           setLoanError('')
                         }}
-                        members={MOCK_MEMBERS}
+                        members={members}
                         error={!!memberError}
                       />
                       {memberError && (

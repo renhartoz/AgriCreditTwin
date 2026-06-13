@@ -51,6 +51,11 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "accounts.jwt.EmailBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 ROOT_URLCONF = "server.urls"
 
 TEMPLATES = [
@@ -74,8 +79,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": env("PGDATABASE", default="agricredit"),
-        "USER": env("PGUSER", default="postgres"),
-        "PASSWORD": env("PGPASSWORD", default="postgres"),
+        "USER": env("PGUSER", default="a"),
+        "PASSWORD": env("PGPASSWORD", default="renhartoz281106"),
         "HOST": env("PGHOST", default="localhost"),
         "PORT": env("PGPORT", default="5432"),
     }
@@ -103,13 +108,17 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-MEDIA_URL = "/media/"
+MEDIA_URL = f"https://res.cloudinary.com/{env('CLOUDINARY_CLOUD_NAME', default='do5ni0oje')}/raw/upload/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+CLOUDINARY_CLOUD_NAME = env('CLOUDINARY_CLOUD_NAME', default='')
+CLOUDINARY_API_KEY = env('CLOUDINARY_API_KEY', default='')
+CLOUDINARY_API_SECRET = env('CLOUDINARY_API_SECRET', default='')
+
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME", default=""),
-    "API_KEY": env("CLOUDINARY_API_KEY", default=""),
-    "API_SECRET": env("CLOUDINARY_API_SECRET", default=""),
+    "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+    "API_KEY": CLOUDINARY_API_KEY,
+    "API_SECRET": CLOUDINARY_API_SECRET,
 }
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"

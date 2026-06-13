@@ -1,20 +1,42 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, Shield, ArrowRight } from 'lucide-react';
 import PasswordInput from '@/components/auth/PasswordInput';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ExternalLogin() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const isValid = email.trim().length > 0 && password.length > 0;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) return;
     setSubmitting(true);
-    setTimeout(() => setSubmitting(false), 2000);
+    setError('');
+    try {
+      const result = await login(email, password);
+      const role = result?.user?.role;
+      if (role === 'auditor') {
+        navigate('/transactions');
+      } else {
+        navigate('/investor');
+      }
+    } catch (err) {
+      const resData = err.response?.data;
+      const msg = resData?.non_field_errors?.[0]
+        || resData?.detail
+        || resData?.error
+        || 'Login gagal. Periksa email dan password Anda.';
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -75,6 +97,12 @@ export default function ExternalLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400">
+                {error}
+              </div>
+            )}
             
             <div className="space-y-1.5">
               <label htmlFor="ext-login-email" className="block text-sm font-medium text-slate-300">

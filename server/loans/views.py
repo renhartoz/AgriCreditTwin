@@ -11,6 +11,7 @@ from .serializers import (
     LoanApplyResponseSerializer,
     LoanRejectedResponseSerializer,
     ErrorResponseSerializer,
+    MemberSerializer,
 )
 from .services import validate_avs
 from simulation.services import run_monte_carlo_simulation
@@ -207,4 +208,19 @@ class AuditLoansView(APIView):
             qs = qs.filter(changed_at__date__lte=end_date)
 
         serializer = self.serializer_class(qs[:200], many=True)
+        return Response(serializer.data)
+
+
+class MemberListView(APIView):
+    permission_classes = [IsOperatorOrAdmin]
+
+    def get(self, request):
+        tenant = request.tenant
+        if not tenant:
+            return Response(
+                {"error": "Tenant context required."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        members = Member.objects.filter(tenant=tenant).order_by("name")
+        serializer = MemberSerializer(members, many=True)
         return Response(serializer.data)

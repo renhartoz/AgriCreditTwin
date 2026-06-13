@@ -2,21 +2,49 @@ from django.utils.deprecation import MiddlewareMixin
 from .tenant import set_tenant_schema, reset_schema
 
 
+def _decode_jwt_payload(token):
+    import json
+    import base64
+    try:
+        payload_b64 = token.split('.')[1]
+        padding = 4 - len(payload_b64) % 4
+        if padding != 4:
+            payload_b64 += '=' * padding
+        return json.loads(base64.urlsafe_b64decode(payload_b64))
+    except (IndexError, ValueError):
+        return None
+
+
 class TenantMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        if not hasattr(request, "user") or not request.user.is_authenticated:
-            request.tenant = None
+        request.tenant = None
+        request.user_role = None
+
+        if hasattr(request, "user") and request.user.is_authenticated:
+            self._resolve_from_profile(request)
             return None
 
-        profile = getattr(request.user, "profile", None)
-        if not profile:
-            request.tenant = None
-            return None
+        auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+        if auth_header.startswith("Bearer "):
+            payload = _decode_jwt_payload(auth_header[7:])
+            if payload and payload.get("tenant_id"):
+                from tenants.models import Tenant
+                try:
+                    tenant = Tenant.objects.get(id=payload["tenant_id"])
+                    request.tenant = tenant
+                    request.user_role = payload.get("role")
+                    set_tenant_schema(tenant.schema_name)
+                except Tenant.DoesNotExist:
+                    pass
 
-        request.tenant = profile.tenant
-        request.user_role = profile.role
-        set_tenant_schema(profile.tenant.schema_name)
         return None
+
+    def _resolve_from_profile(self, request):
+        profile = getattr(request.user, "profile", None)
+        if profile and profile.tenant:
+            request.tenant = profile.tenant
+            request.user_role = profile.role
+            set_tenant_schema(profile.tenant.schema_name)
 
     def process_response(self, request, response):
         reset_schema()
