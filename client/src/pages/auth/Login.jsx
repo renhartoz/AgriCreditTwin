@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, ArrowRight, Info } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import AuthLogo from '@/components/auth/AuthLogo';
 import PasswordInput from '@/components/auth/PasswordInput';
 
@@ -193,24 +193,8 @@ export default function Login() {
 
           
           <div
-            className="mt-6 p-3 rounded-xl border border-dashed border-amber-300/40 bg-amber-50/50"
+            className="mt-8 text-center space-y-4"
             style={{ animation: 'auth-fade-up 0.4s ease-out 0.2s both' }}
-          >
-            <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-amber-700 leading-relaxed">
-                <span className="font-bold">Adaptive Routing:</span> Frontend reads user token/role 
-                on submission to dynamically route Admins/Operators to their respective{' '}
-                <code className="px-1 py-0.5 bg-amber-100 rounded text-[10px] font-mono">/dashboard</code>{' '}
-                transparently.
-              </p>
-            </div>
-          </div>
-
-          
-          <div
-            className="mt-6 text-center space-y-3"
-            style={{ animation: 'auth-fade-up 0.4s ease-out 0.3s both' }}
           >
             <p className="text-sm text-muted-foreground">
               Koperasi belum terdaftar?{' '}
