@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   TriangleAlert,
@@ -7,15 +7,12 @@ import {
   TrendingUp,
   Landmark,
   ShieldCheck,
-  Database,
   Warehouse,
   FileText,
   ArrowRight,
-  ClipboardList,
   PackagePlus,
   CheckCircle2,
-  XCircle,
-  HelpCircle
+  XCircle
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -29,34 +26,27 @@ import {
   Legend,
   ReferenceArea,
   LineChart,
-  PieChart,
-  Pie,
-  Cell,
   BarChart
 } from 'recharts'
 
 function Dashboard() {
-  // --- Tenant State (Multi-tenant schema alignment) ---
-  const [tenantName, setTenantName] = useState('Koperasi Padiwangi Utama')
+  const tenantName = 'Koperasi Padiwangi Utama'
   const [isVerified, setIsVerified] = useState(true)
 
-  // --- Summary Card Metrics ---
   const activeMembersCount = 1248
   const totalDefaultedAmount = 124500000
   const totalDefaultedCount = 12
   const totalOutstandingLoans = 1842500000
   const totalSavings = 420700000
 
-  // --- Early Warning Table ---
-  const [highRiskLoans, setHighRiskLoans] = useState([
+  const highRiskLoans = [
     { id: 'LN-2026-004A', memberName: 'Slamet Rahardjo', pd: 78.4, status: 'approved', deficitMonth: 'Juli 2026' },
     { id: 'LN-2026-012B', memberName: 'Ni Made Astuti', pd: 64.1, status: 'restructured', deficitMonth: 'Juli 2026' },
     { id: 'LN-2025-089C', memberName: 'Kuswanto', pd: 59.2, status: 'approved', deficitMonth: 'Juli 2026' },
     { id: 'LN-2026-045X', memberName: 'Siti Aminah', pd: 51.5, status: 'pending', deficitMonth: 'Agustus 2026' },
     { id: 'LN-2025-112Y', memberName: 'Joko Susilo', pd: 92.0, status: 'defaulted', deficitMonth: 'Defisit Segera' }
-  ])
+  ]
 
-  // Recharts Data
   const seasonalCashFlowData = [
     { name: 'Jan', HarvestCycle: 20, CashInflow: 45 },
     { name: 'Feb', HarvestCycle: 15, CashInflow: 50 },
@@ -79,13 +69,6 @@ function Dashboard() {
     { month: 'Apr', NPL: 19.0, Baseline: 22.0 },
     { month: 'May', NPL: 18.5, Baseline: 22.0 },
     { month: 'Jun', NPL: 18.2, Baseline: 22.0 }
-  ]
-
-  const cropLandData = [
-    { name: 'Wetland Rice (Padi Sawah)', value: 45, color: '#059669' },
-    { name: 'Maize (Jagung)', value: 30, color: '#10b981' },
-    { name: 'Cassava (Singkong)', value: 15, color: '#b45309' },
-    { name: 'Soybeans (Kedelai)', value: 10, color: '#78716c' }
   ]
 
   const totalAssetValuation = 847250000
@@ -115,7 +98,7 @@ function Dashboard() {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
   }
 
-  // Render status badges in Indonesian
+  
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
@@ -155,7 +138,7 @@ function Dashboard() {
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 text-slate-800 dark:text-slate-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
-        {/* ── HEADER / Active Tenant Context ────────────────────── */}
+        
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
           <div>
             <div className="flex items-center gap-3">
@@ -193,10 +176,10 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* ── SUMMARY CARDS: Strict Schema Metrics ───────────────── */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-          {/* Card 1: Active Members */}
+          
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-slate-450 dark:text-slate-500">
@@ -219,7 +202,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Card 2: Total Defaulted Loans */}
+          
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-slate-450 dark:text-slate-500">
@@ -242,7 +225,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Card 3: Total Outstanding Loans */}
+          
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-slate-450 dark:text-slate-500">
@@ -265,7 +248,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Card 4: Total Savings */}
+          
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-slate-450 dark:text-slate-500">
@@ -290,10 +273,10 @@ function Dashboard() {
 
         </div>
 
-        {/* ── MIDDLE SECTION: Recharts Visualizations ─────────────── */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Seasonal Cash Flow (spans 2 cols) */}
+          
           <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
@@ -323,7 +306,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* MoM NPL Reduction */}
+          
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-col">
             <div className="mb-4 border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Penurunan Kredit Bermasalah (NPL) Bulanan</h3>
@@ -345,7 +328,7 @@ function Dashboard() {
 
         </div>
 
-        {/* ── ALERTS SECTION: High Default Probability Loans ─────── */}
+        
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-900/50 overflow-hidden shadow-xs">
           <div className="bg-rose-50/30 dark:bg-rose-950/10 border-b border-rose-100 dark:border-rose-900/40 p-5 flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/20 flex items-center justify-center text-rose-600 dark:text-rose-450 shrink-0">
@@ -407,10 +390,10 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* ── BOTTOM SECTION: Warehouse & Logs ──────────────────── */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
 
-          {/* Warehouse Asset Valuation */}
+          
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -465,7 +448,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Recent Operations Log */}
+          
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
               <FileText className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />

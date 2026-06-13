@@ -1,4 +1,4 @@
-import React from 'react';
+import { Fragment } from 'react';
 import { Check } from 'lucide-react';
 
 export default function StepIndicator({ steps, currentStep }) {
@@ -8,11 +8,10 @@ export default function StepIndicator({ steps, currentStep }) {
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isActive = index === currentStep;
-          const isUpcoming = index > currentStep;
 
           return (
-            <React.Fragment key={index}>
-              {/* Step circle + label */}
+            <Fragment key={index}>
+              
               <div className="flex flex-col items-center relative z-10">
                 <div
                   className={`
@@ -42,7 +41,7 @@ export default function StepIndicator({ steps, currentStep }) {
                 </span>
               </div>
 
-              {/* Connector line */}
+              
               {index < steps.length - 1 && (
                 <div className="flex-1 h-0.5 mx-2 mb-6 rounded-full overflow-hidden bg-border">
                   <div
@@ -51,7 +50,7 @@ export default function StepIndicator({ steps, currentStep }) {
                   />
                 </div>
               )}
-            </React.Fragment>
+            </Fragment>
           );
         })}
       </div>

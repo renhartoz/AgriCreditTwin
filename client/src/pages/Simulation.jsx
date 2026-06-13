@@ -1,22 +1,18 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Play,
   RotateCcw,
   ShieldCheck,
-  TrendingUp,
   Coins,
   Sprout,
   Landmark,
   TriangleAlert,
-  Info,
-  Calendar,
-  ArrowRight,
-  TrendingDown,
   CheckCircle2,
   AlertCircle,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  Info
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -31,7 +27,6 @@ import {
   ReferenceLine
 } from 'recharts'
 
-// Commodity lookup price per ton
 const COMMODITY_PRICES = {
   'Rice': 6500000,
   'Maize': 4500000,
@@ -54,12 +49,10 @@ const MONTHS_LIST = [
   { value: 12, label: 'Desember' }
 ]
 
-// Custom Legend Component to display simplified, clean pill badges
 const CustomLegend = (props) => {
   const { payload } = props
   if (!payload) return null
   
-  // Filter out duplicate or range values
   const items = payload.filter(item => item.value !== 'range' && item.dataKey !== 'range' && item.payload?.dataKey !== 'range')
   
   return (
@@ -86,7 +79,7 @@ const CustomLegend = (props) => {
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border ${bgClass} ${colorClass} transition-colors`}
           >
             <span
-              className="w-2 h-2 rounded-full"
+              className="w-2.5 h-2.5 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
             <span>{entry.value}</span>
@@ -97,13 +90,10 @@ const CustomLegend = (props) => {
   )
 }
 
-// Custom Tooltip Component for clean styling and formatted values
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    // Filter out the range Area component
     const items = payload.filter(item => item.name !== 'range' && item.dataKey !== 'range')
     
-    // Helper to format currency
     const formatRupiah = (val) => {
       if (val === undefined || val === null) return 'Rp 0'
       const isNeg = val < 0
@@ -145,50 +135,182 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null
 }
 
+const calculateSimulation = ({
+  tenor,
+  amount,
+  declaredYield,
+  livingCost,
+  farmingCost,
+  commodity,
+  plantingMonth,
+  harvestMonth
+}) => {
+  const numSimulations = 250
+  const basePrice = COMMODITY_PRICES[commodity] || 6500000
+
+  const monthlyInstallment = amount / tenor
+  const monthlyInterestRate = 0.005
+
+  const trajectories = []
+  let accumulatedExpectedRevenue = 0
+  let accumulatedExpectedOutflow = 0
+  let defaultCount = 0
+
+  for (let s = 0; s < numSimulations; s++) {
+    let currentBalance = 0
+    const path = [currentBalance]
+    let pathRevenue = 0
+    let pathOutflow = 0
+    let hasPathDefaulted = false
+
+    for (let t = 1; t <= tenor; t++) {
+      const currentMonthNum = ((t - 1) % 12) + 1
+
+      let inflow = 0
+      if (t === 1) {
+        inflow += amount
+      }
+
+      if (currentMonthNum === harvestMonth) {
+        const yieldVariation = -0.18 + Math.random() * 0.28
+        const simulatedYield = Math.max(0, declaredYield * (1 + yieldVariation))
+
+        const priceVariation = -0.15 + Math.random() * 0.30
+        const simulatedPrice = Math.max(0, basePrice * (1 + priceVariation))
+
+        const harvestRevenue = simulatedYield * simulatedPrice
+        inflow += harvestRevenue
+        pathRevenue += harvestRevenue
+      }
+
+      const outstandingLoan = Math.max(0, amount - (t - 1) * monthlyInstallment)
+      const interestPayment = outstandingLoan * monthlyInterestRate
+      const debtService = monthlyInstallment + interestPayment
+
+      const livingVariation = -0.08 + Math.random() * 0.18
+      const simulatedLiving = livingCost * (1 + livingVariation)
+
+      const farmingVariation = currentMonthNum === plantingMonth ? 0.30 : 0
+      const simulatedFarming = farmingCost * (1 + farmingVariation + (-0.10 + Math.random() * 0.20))
+
+      const monthlyOut = simulatedLiving + simulatedFarming + debtService
+      pathOutflow += monthlyOut
+
+      currentBalance = currentBalance + inflow - monthlyOut
+      path.push(currentBalance)
+
+      if (currentBalance < 0) {
+        hasPathDefaulted = true
+      }
+    }
+
+    trajectories.push(path)
+    accumulatedExpectedRevenue += pathRevenue
+    accumulatedExpectedOutflow += pathOutflow
+    if (hasPathDefaulted) {
+      defaultCount++
+    }
+  }
+
+  const chartData = []
+  for (let t = 0; t <= tenor; t++) {
+    const balances = trajectories.map(path => path[t])
+    balances.sort((a, b) => a - b)
+
+    const p10Idx = Math.round(numSimulations * 0.10)
+    const p50Idx = Math.round(numSimulations * 0.50)
+    const p90Idx = Math.round(numSimulations * 0.90)
+
+    const p10Val = Math.round(balances[p10Idx])
+    const p90Val = Math.round(balances[p90Idx])
+
+    chartData.push({
+      name: t === 0 ? 'Mulai' : `Bln ${t}`,
+      p10: p10Val,
+      p50: Math.round(balances[p50Idx]),
+      p90: p90Val,
+      range: [p10Val, p90Val]
+    })
+  }
+
+  const probabilityOfDefault = (defaultCount / numSimulations) * 100
+  const expectedRevenue = accumulatedExpectedRevenue / numSimulations
+  const expectedOutflow = accumulatedExpectedOutflow / numSimulations
+  const expectedNetBalance = chartData[tenor].p50
+
+  let riskLevel
+  let recommendationText
+  let recommendationColor
+
+  if (probabilityOfDefault < 5) {
+    riskLevel = 'LOW'
+    recommendationText = 'PROPOSAL DISETUJUI: Koridor arus kas sangat aman. Proyeksi stokastik menunjukkan kapasitas pembayaran kembali yang kuat (PD rendah).'
+    recommendationColor = 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-300'
+  } else if (probabilityOfDefault <= 15) {
+    riskLevel = 'WARNING'
+    recommendationText = 'HATI-HATI: Terdapat risiko defisit kas musiman. Disarankan untuk menambah tenor kredit atau menyesuaikan pencairan dana pasca-panen.'
+    recommendationColor = 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-800/40 dark:text-emerald-300'
+  } else {
+    riskLevel = 'HIGH_RISK'
+    recommendationText = 'RISIKO TINGGI: Kemungkinan besar terjadi defisit kas di tengah siklus. Direkomendasikan restrukturisasi parameter tenor atau penurunan plafon kredit.'
+    recommendationColor = 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-800/40 dark:text-red-300'
+  }
+
+  return {
+    chartData,
+    pd: probabilityOfDefault.toFixed(1),
+    riskLevel,
+    recommendationText,
+    recommendationColor,
+    expectedRevenue: Math.round(expectedRevenue),
+    expectedOutflow: Math.round(expectedOutflow),
+    expectedNetBalance: Math.round(expectedNetBalance)
+  }
+}
+
 function Simulation() {
   const [searchParams] = useSearchParams()
 
-  // ─── Django Model Mapped Inputs ─────────────────────────────
-  // Card 1: Loan Request
   const [loanAmount, setLoanAmount] = useState(() => {
     const amt = searchParams.get('amount')
     return amt ? parseInt(amt, 10) : 150000000
   })
   const [loanTenor, setLoanTenor] = useState(12)
 
-  // Card 2: Agricultural Variables
   const [commodity, setCommodity] = useState('Rice')
   const [declaredYield, setDeclaredYield] = useState(18.5)
   const [plantingMonth, setPlantingMonth] = useState(12)
   const [harvestMonth, setHarvestMonth] = useState(4)
 
-  // Card 3: Outflow Variables
   const [livingCost, setLivingCost] = useState(2000000)
   const [farmingCost, setFarmingCost] = useState(500000)
 
-  // ─── Calculation / Simulation States ────────────────────────
   const [isSimulating, setIsSimulating] = useState(false)
-  const [hasRun, setHasRun] = useState(false)
-  const [simResults, setSimResults] = useState(null)
 
-  // Sync route params for restructuring
-  useEffect(() => {
-    const amt = searchParams.get('amount')
-    if (amt) {
-      setLoanAmount(parseInt(amt, 10))
+  const amtParam = searchParams.get('amount')
+  const [prevAmtParam, setPrevAmtParam] = useState(amtParam)
+  if (amtParam !== prevAmtParam) {
+    setPrevAmtParam(amtParam)
+    if (amtParam) {
+      setLoanAmount(parseInt(amtParam, 10))
     }
-  }, [searchParams])
+  }
+
+  const [simResults, setSimResults] = useState(() => calculateSimulation({
+    tenor: 12,
+    amount: loanAmount,
+    declaredYield: 18.5,
+    livingCost: 2000000,
+    farmingCost: 500000,
+    commodity: 'Rice',
+    plantingMonth: 12,
+    harvestMonth: 4
+  }))
+  const [hasRun, setHasRun] = useState(true)
 
   const formatNumberWithDots = (num) => {
     if (num === undefined || num === null || num === '') return ''
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-  }
-
-  const formatRupiahWithSign = (val) => {
-    if (val === undefined || val === null || val === '') return 'Rp 0'
-    const isNeg = val < 0
-    const absVal = Math.abs(val)
-    return `${isNeg ? '-' : ''}Rp ${formatNumberWithDots(absVal)}`
   }
 
   const formatYAxis = (val) => {
@@ -198,7 +320,6 @@ function Simulation() {
     return `${isNeg ? '-' : ''}${(absVal / 1000000).toFixed(0)} Jt`
   }
 
-  // Handle currency limits (Strict 15 digit checking)
   const handleCurrencyInput = (val, setter) => {
     const numeric = val.replace(/\D/g, '')
     if (numeric.length <= 15) {
@@ -219,159 +340,32 @@ function Simulation() {
     setSimResults(null)
   }
 
-  // Stochastic simulation engine (Monte Carlo)
   const runStochasticSimulation = () => {
     setIsSimulating(true)
 
     setTimeout(() => {
-      const numSimulations = 250
-      const tenor = Number(loanTenor) || 12
-      const amount = Number(loanAmount) || 0
-      const declaredYieldTons = Number(declaredYield) || 0
-      const monthlyLiving = Number(livingCost) || 0
-      const monthlyFarming = Number(farmingCost) || 0
-      const basePrice = COMMODITY_PRICES[commodity] || 6500000
-
-      // Cooperative interest and service formulas
-      const monthlyInstallment = amount / tenor
-      const monthlyInterestRate = 0.005 // 0.5% interest rate
-
-      const trajectories = []
-      let accumulatedExpectedRevenue = 0
-      let accumulatedExpectedOutflow = 0
-      let defaultCount = 0
-
-      for (let s = 0; s < numSimulations; s++) {
-        let currentBalance = 0
-        const path = [currentBalance]
-        let pathRevenue = 0
-        let pathOutflow = 0
-        let hasPathDefaulted = false
-
-        for (let t = 1; t <= tenor; t++) {
-          const currentMonthNum = ((t - 1) % 12) + 1 // 1-12 integer
-
-          // 1. Inflow
-          let inflow = 0
-          if (t === 1) {
-            inflow += amount // Loan disbursement injection
-          }
-
-          // Harvest month revenue injection
-          if (currentMonthNum === harvestMonth) {
-            const yieldVariation = -0.18 + Math.random() * 0.28 // -18% to +10%
-            const simulatedYield = Math.max(0, declaredYieldTons * (1 + yieldVariation))
-
-            const priceVariation = -0.15 + Math.random() * 0.30 // -15% to +15%
-            const simulatedPrice = Math.max(0, basePrice * (1 + priceVariation))
-
-            const harvestRevenue = simulatedYield * simulatedPrice
-            inflow += harvestRevenue
-            pathRevenue += harvestRevenue
-          }
-
-          // 2. Outflow
-          const outstandingLoan = Math.max(0, amount - (t - 1) * monthlyInstallment)
-          const interestPayment = outstandingLoan * monthlyInterestRate
-          const debtService = monthlyInstallment + interestPayment
-
-          // Living costs variations
-          const livingVariation = -0.08 + Math.random() * 0.18 // -8% to +10%
-          const simulatedLiving = monthlyLiving * (1 + livingVariation)
-
-          // Farming costs variations (increases slightly on planting month)
-          const farmingVariation = currentMonthNum === plantingMonth ? 0.30 : 0
-          const simulatedFarming = monthlyFarming * (1 + farmingVariation + (-0.10 + Math.random() * 0.20))
-
-          const monthlyOut = simulatedLiving + simulatedFarming + debtService
-          pathOutflow += monthlyOut
-
-          currentBalance = currentBalance + inflow - monthlyOut
-          path.push(currentBalance)
-
-          if (currentBalance < 0) {
-            hasPathDefaulted = true
-          }
-        }
-
-        trajectories.push(path)
-        accumulatedExpectedRevenue += pathRevenue
-        accumulatedExpectedOutflow += pathOutflow
-        if (hasPathDefaulted) {
-          defaultCount++
-        }
-      }
-
-      // Compile chart percentiles
-      const chartData = []
-      for (let t = 0; t <= tenor; t++) {
-        const balances = trajectories.map(path => path[t])
-        balances.sort((a, b) => a - b)
-
-        const p10Idx = Math.round(numSimulations * 0.10)
-        const p50Idx = Math.round(numSimulations * 0.50)
-        const p90Idx = Math.round(numSimulations * 0.90)
-
-        const p10Val = Math.round(balances[p10Idx])
-        const p90Val = Math.round(balances[p90Idx])
-
-        chartData.push({
-          name: t === 0 ? 'Mulai' : `Bln ${t}`,
-          p10: p10Val,
-          p50: Math.round(balances[p50Idx]),
-          p90: p90Val,
-          range: [p10Val, p90Val]
-        })
-      }
-
-      const probabilityOfDefault = (defaultCount / numSimulations) * 100
-      const expectedRevenue = accumulatedExpectedRevenue / numSimulations
-      const expectedOutflow = accumulatedExpectedOutflow / numSimulations
-      const expectedNetBalance = chartData[tenor].p50
-
-      let riskLevel = 'LOW'
-      let recommendationText = ''
-      let recommendationColor = ''
-
-      if (probabilityOfDefault < 5) {
-        riskLevel = 'LOW'
-        recommendationText = 'PROPOSAL DISETUJUI: Koridor arus kas sangat aman. Proyeksi stokastik menunjukkan kapasitas pembayaran kembali yang kuat (PD rendah).'
-        recommendationColor = 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-300'
-      } else if (probabilityOfDefault <= 15) {
-        riskLevel = 'WARNING'
-        recommendationText = 'HATI-HATI: Terdapat risiko defisit kas musiman. Disarankan untuk menambah tenor kredit atau menyesuaikan pencairan dana pasca-panen.'
-        recommendationColor = 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-800/40 dark:text-amber-300'
-      } else {
-        riskLevel = 'HIGH_RISK'
-        recommendationText = 'RISIKO TINGGI: Kemungkinan besar terjadi defisit kas di tengah siklus. Direkomendasikan restrukturisasi parameter tenor atau penurunan plafon kredit.'
-        recommendationColor = 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-800/40 dark:text-red-300'
-      }
-
-      setSimResults({
-        chartData,
-        pd: probabilityOfDefault.toFixed(1),
-        riskLevel,
-        recommendationText,
-        recommendationColor,
-        expectedRevenue: Math.round(expectedRevenue),
-        expectedOutflow: Math.round(expectedOutflow),
-        expectedNetBalance: Math.round(expectedNetBalance)
+      const results = calculateSimulation({
+        tenor: Number(loanTenor) || 12,
+        amount: Number(loanAmount) || 0,
+        declaredYield: Number(declaredYield) || 0,
+        livingCost: Number(livingCost) || 0,
+        farmingCost: Number(farmingCost) || 0,
+        commodity,
+        plantingMonth,
+        harvestMonth
       })
 
+      setSimResults(results)
       setIsSimulating(false)
       setHasRun(true)
     }, 800)
   }
 
-  useEffect(() => {
-    runStochasticSimulation()
-  }, [])
-
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 dark:bg-slate-950 dark:text-slate-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
-        {/* PAGE HEADER */}
+        
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
@@ -390,13 +384,13 @@ function Simulation() {
           </div>
         </div>
 
-        {/* 2-COLUMN MAIN LAYOUT */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-          {/* LEFT: Parameters Form */}
+          
           <div className="lg:col-span-7 space-y-6">
 
-            {/* CARD 1: Loan Application Parameters */}
+            
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
               <div className="flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <Coins className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -406,7 +400,7 @@ function Simulation() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* Plafon Kredit */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Jumlah Pengajuan Pinjaman (Plafon Kredit)
@@ -426,7 +420,7 @@ function Simulation() {
                   <span className="text-[10px] text-slate-400 dark:text-slate-500">Maksimal 15 digit</span>
                 </div>
 
-                {/* Tenor Kredit */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Tenor Pinjaman (Jangka Waktu)
@@ -452,7 +446,7 @@ function Simulation() {
               </div>
             </div>
 
-            {/* CARD 2: Agricultural Variables */}
+            
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
               <div className="flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <Sprout className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -462,7 +456,7 @@ function Simulation() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                {/* Commodity Selection */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Komoditas Pertanian
@@ -482,7 +476,7 @@ function Simulation() {
                   </div>
                 </div>
 
-                {/* Declared Yield */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Estimasi Hasil Panen
@@ -503,9 +497,9 @@ function Simulation() {
                 </div>
               </div>
 
-              {/* Planting & Harvest month dropdown selectors */}
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* Planting Month */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Bulan Penanaman
@@ -524,7 +518,7 @@ function Simulation() {
                   </div>
                 </div>
 
-                {/* Harvest Month */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Bulan Pemanenan
@@ -545,7 +539,7 @@ function Simulation() {
               </div>
             </div>
 
-            {/* CARD 3: Outflow Variables */}
+            
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
               <div className="flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <Landmark className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -555,7 +549,7 @@ function Simulation() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* Monthly Living Cost */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Biaya Hidup Bulanan
@@ -578,7 +572,7 @@ function Simulation() {
                   <span className="text-[10px] text-slate-400 dark:text-slate-500">Maksimal 15 digit</span>
                 </div>
 
-                {/* Monthly Farming Cost */}
+                
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Biaya Operasional Tani Bulanan
@@ -603,7 +597,7 @@ function Simulation() {
               </div>
             </div>
 
-            {/* ACTION FOOTER */}
+            
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 type="button"
@@ -636,10 +630,10 @@ function Simulation() {
 
           </div>
 
-          {/* RIGHT: Output Visualizations */}
+          
           <div className="lg:col-span-5 space-y-6">
 
-            {/* Cash Flow Corridor */}
+            
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-col min-h-[500px]">
               <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
@@ -694,7 +688,7 @@ function Simulation() {
                 </div>
               ) : simResults ? (
                 <div className="flex-1 flex flex-col justify-between space-y-5">
-                  {/* Chart */}
+                  
                   <div className="h-68 w-full text-xs font-sans">
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart
@@ -713,7 +707,7 @@ function Simulation() {
                         <Tooltip content={<CustomTooltip />} />
                         <Legend content={<CustomLegend />} />
 
-                        {/* Beautiful Ranged Area showing the projection corridor */}
+                        
                         <Area
                           type="monotone"
                           dataKey="range"
@@ -724,7 +718,7 @@ function Simulation() {
                           tooltipType="none"
                         />
 
-                        {/* Optimistic Boundary Line */}
+                        
                         <Line
                           type="monotone"
                           dataKey="p90"
@@ -735,7 +729,7 @@ function Simulation() {
                           name="Koridor Optimis (P90)"
                         />
 
-                        {/* Pessimistic Boundary Line */}
+                        
                         <Line
                           type="monotone"
                           dataKey="p10"
@@ -746,7 +740,7 @@ function Simulation() {
                           name="Koridor Pesimis (P10)"
                         />
 
-                        {/* Expected cash flow line */}
+                        
                         <Line
                           type="monotone"
                           dataKey="p50"
@@ -757,7 +751,7 @@ function Simulation() {
                           name="Proyeksi Median (P50)"
                         />
 
-                        {/* Deficit Reference Line */}
+                        
                         <ReferenceLine
                           y={0}
                           stroke="#f43f5e"
@@ -776,7 +770,7 @@ function Simulation() {
                     </ResponsiveContainer>
                   </div>
 
-                  {/* Decision alert banner */}
+                  
                   <div className={`p-4 rounded-xl border flex gap-3 ${simResults.recommendationColor} transition-all duration-300`}>
                     {simResults.riskLevel === 'LOW' && (
                       <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
@@ -797,7 +791,7 @@ function Simulation() {
                     </div>
                   </div>
 
-                  {/* Vetting summary values */}
+                  
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 rounded-xl">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500 block">
@@ -853,7 +847,7 @@ function Simulation() {
               ) : null}
             </div>
 
-            {/* Calculation details */}
+            
             <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs space-y-3">
               <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                 <Info className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

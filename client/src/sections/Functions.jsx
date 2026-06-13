@@ -1,4 +1,3 @@
-import React from 'react'
 import { LineChart, Shield, Sprout, Layers, Coins, Calendar, Database, Eye } from 'lucide-react'
 
 function Functions({ mode }) {
@@ -56,12 +55,12 @@ function Functions({ mode }) {
 
   return (
     <section id="functions" className="py-20 bg-background relative overflow-hidden border-b border-border">
-      {/* Subtle background grid pattern matching modern design system */}
+      
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-4 md:px-20 relative z-10">
         
-        {/* Section Header */}
+        
         <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
           <span className={`text-xs font-mono uppercase tracking-widest block mb-2 font-bold ${
             isInvestor ? 'text-[#169d92]' : 'text-primary-foreground'
@@ -82,7 +81,7 @@ function Functions({ mode }) {
           </p>
         </div>
 
-        {/* Features Grid */}
+        
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feat, idx) => (
             <div 

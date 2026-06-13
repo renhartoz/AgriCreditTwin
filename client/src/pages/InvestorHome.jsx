@@ -1,4 +1,3 @@
-import React from 'react'
 import Hero from '@/sections/Hero'
 import Functions from '@/sections/Functions'
 import CTA from '@/sections/CTA'

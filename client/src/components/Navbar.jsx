@@ -1,13 +1,11 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
-  Briefcase,
   ChartNoAxesCombined,
   FastForward,
   HardDriveDownload,
   LayoutDashboard,
   SearchAlert,
   TriangleAlert,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileNavbar from "./MobileNavbar";
@@ -15,10 +13,9 @@ import MobileNavbar from "./MobileNavbar";
 function Navbar() {
   const user = true;
   const role = "auditor";
-  // cooperative
-  // investor
-  // auditor
-  const navigate = useNavigate();
+  
+  
+  
   const location = useLocation();
 
   return (
@@ -97,7 +94,7 @@ function Navbar() {
   );
 }
 
-// Helper to compute link class based on active state
+
 const navLinkClass = (path, currentPath) => {
   const isActive = currentPath === path;
   return isActive
@@ -105,7 +102,7 @@ const navLinkClass = (path, currentPath) => {
     : "flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground font-medium text-sm transition-colors";
 };
 
-// Create a helper component for the authenticated links
+
 const NavLinks = ({ role, currentPath }) => {
   return (
     <>

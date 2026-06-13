@@ -1,7 +1,6 @@
-import React from 'react'
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
-import { Check, ArrowRight, TrendingUp, ShieldCheck, Cpu, Landmark } from "lucide-react";
+import { Check, ArrowRight, ShieldCheck, Cpu } from "lucide-react";
 
 function Hero({ mode }) {
   const isInvestor = mode === 'investor'
@@ -11,12 +10,12 @@ function Hero({ mode }) {
     <section className="overflow-hidden bg-radial from-background via-background to-muted/20 border-b border-border">
       <div className="overflow-hidden h-full mx-auto w-full max-w-screen-xl px-4 md:px-20 pb-16 pt-10 lg:pt-16 lg:grid lg:grid-cols-12 lg:gap-8 lg:pb-24 relative">
         
-        {/* Left Content Column */}
+        
         <div className="lg:col-span-7 px-4 lg:px-0 z-10 flex flex-col justify-center">
           
           <div className="relative mx-auto text-center lg:text-left flex flex-col items-center lg:items-start animate-fade-in">
             
-            {/* Persona Badge */}
+            
             <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-6 border ${
               isInvestor 
                 ? 'bg-[#1ecfc1]/10 text-[#169d92] border-[#1ecfc1]/30' 
@@ -35,7 +34,7 @@ function Hero({ mode }) {
               )}
             </div>
 
-            {/* Headline */}
+            
             <div className="relative w-fit tracking-tight text-balance font-extrabold text-4xl sm:text-5xl lg:text-6xl flex gap-2 items-center flex-wrap justify-center lg:justify-start text-foreground leading-tight">
               {isInvestor ? (
                 <>
@@ -54,7 +53,7 @@ function Hero({ mode }) {
               )}
             </div>
 
-            {/* Description */}
+            
             <div className="mt-6 text-base sm:text-lg lg:pr-6 max-w-prose text-center lg:text-left text-balance md:text-wrap text-muted-foreground leading-relaxed">
               {isInvestor ? (
                 <p className="text-lg">
@@ -67,7 +66,7 @@ function Hero({ mode }) {
               )}
             </div>
 
-            {/* Bullets List */}
+            
             <ul className="mt-8 space-y-3 text-left w-full max-w-md">
               {isInvestor ? (
                 <>
@@ -114,7 +113,7 @@ function Hero({ mode }) {
               )}
             </ul>
 
-            {/* Action Buttons */}
+            
             <div className="mt-8 flex flex-col sm:flex-row justify-center lg:justify-start items-center w-full gap-4">
               {isInvestor ? (
                 <>
@@ -150,18 +149,18 @@ function Hero({ mode }) {
           </div>
         </div>
 
-        {/* Right Graphical Column */}
+        
         <div className="lg:col-span-5 hidden lg:flex items-center justify-center relative min-h-[450px]">
-          {/* Decorative Background Blur Circles */}
+          
           <div className={`absolute -top-10 -right-10 w-72 h-72 rounded-full filter blur-3xl opacity-20 transition-all duration-700 ${
             isInvestor ? 'bg-[#1ecfc1]' : 'bg-[#7FFF00]'
           }`} />
           <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-blue-500 rounded-full filter blur-3xl opacity-10" />
 
-          {/* Premium Animated Dashboard Panel */}
+          
           <div className="relative w-full max-w-md bg-card/65 backdrop-blur-md rounded-2xl border border-border shadow-2xl p-6 overflow-hidden transition-all duration-500 hover:shadow-3xl hover:-translate-y-1">
             
-            {/* Top Bar / Header of Mockup */}
+            
             <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
@@ -179,7 +178,7 @@ function Hero({ mode }) {
             </div>
 
             {isInvestor ? (
-              /* Investor Mock Dashboard Graphics */
+              
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-muted/40 rounded-xl border border-border">
@@ -198,25 +197,25 @@ function Hero({ mode }) {
                   </div>
                 </div>
 
-                {/* SVG Graph representation */}
+                
                 <div className="p-4 bg-muted/30 rounded-xl border border-border relative">
                   <span className="text-xs font-semibold block mb-2 text-foreground">Proyeksi Risiko Stokastik</span>
                   <div className="h-32 w-full relative overflow-hidden flex items-end">
-                    {/* Graph Grid Lines */}
+                    
                     <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none opacity-20">
                       <div className="border-b border-muted-foreground w-full" />
                       <div className="border-b border-muted-foreground w-full" />
                       <div className="border-b border-muted-foreground w-full" />
                     </div>
-                    {/* SVG Graphic Curves */}
+                    
                     <svg className="w-full h-full absolute inset-0 overflow-visible" viewBox="0 0 300 120">
-                      {/* Optimistic Path */}
+                      
                       <path d="M 0 100 Q 75 90, 150 50 T 300 20" fill="none" stroke="#1ecfc1" strokeWidth="2.5" strokeDasharray="1" opacity="0.6" />
-                      {/* Expected Path */}
+                      
                       <path d="M 0 100 Q 75 95, 150 70 T 300 45" fill="none" stroke="#1ecfc1" strokeWidth="3" />
-                      {/* Pessimistic Path */}
+                      
                       <path d="M 0 100 Q 75 105, 150 90 T 300 85" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="3" opacity="0.8" />
-                      {/* Area Fill */}
+                      
                       <path d="M 0 100 Q 75 90, 150 50 T 300 20 L 300 120 L 0 120 Z" fill="url(#investor-gradient)" opacity="0.08" />
                       
                       <defs>
@@ -234,7 +233,7 @@ function Hero({ mode }) {
                   </div>
                 </div>
 
-                {/* Investment List */}
+                
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs p-2 bg-muted/20 rounded-lg border border-border/50">
                     <span className="font-semibold text-foreground">Koperasi Bumi Lestari</span>
@@ -247,7 +246,7 @@ function Hero({ mode }) {
                 </div>
               </div>
             ) : (
-              /* Cooperative Mock Simulator Graphics */
+              
               <div className="space-y-4">
                 <div className="space-y-3">
                   <div>
@@ -273,7 +272,7 @@ function Hero({ mode }) {
                   </div>
                 </div>
 
-                {/* Simulation Output Graph */}
+                
                 <div className="p-3 bg-muted/30 rounded-xl border border-border">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-semibold text-foreground block">Koridor Arus Kas</span>
@@ -283,11 +282,11 @@ function Hero({ mode }) {
                   </div>
                   <div className="h-24 w-full relative overflow-hidden flex items-end">
                     <svg className="w-full h-full absolute inset-0 overflow-visible" viewBox="0 0 300 100">
-                      {/* Safety Corridor Area */}
+                      
                       <path d="M 0 80 Q 75 40, 150 35 T 300 15 L 300 85 T 150 90 Q 75 95, 0 80 Z" fill="url(#coop-corridor)" opacity="0.12" />
-                      {/* Simulated Farmer Cash Flow */}
+                      
                       <path d="M 0 80 Q 75 60, 150 50 T 300 30" fill="none" stroke="#7FFF00" strokeWidth="3" />
-                      {/* Repayment Threshold */}
+                      
                       <line x1="0" y1="75" x2="300" y2="75" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="3" opacity="0.6" />
                       
                       <defs>

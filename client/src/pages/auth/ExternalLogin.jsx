@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, Shield, ArrowRight } from 'lucide-react';
 import PasswordInput from '@/components/auth/PasswordInput';
@@ -21,7 +21,7 @@ export default function ExternalLogin() {
     <div className="corporate-theme min-h-screen flex items-center justify-center p-4 sm:p-6"
       style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)' }}
     >
-      {/* Decorative elements */}
+      
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04]"
           style={{
@@ -44,7 +44,7 @@ export default function ExternalLogin() {
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo / Brand */}
+        
         <div className="flex flex-col items-center mb-8" style={{ animation: 'auth-fade-up 0.3s ease-out' }}>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center">
@@ -62,7 +62,7 @@ export default function ExternalLogin() {
           </p>
         </div>
 
-        {/* Card */}
+        
         <div
           className="corp-card rounded-2xl p-6 sm:p-8"
           style={{ animation: 'auth-fade-up 0.4s ease-out 0.1s both' }}
@@ -75,7 +75,7 @@ export default function ExternalLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
+            
             <div className="space-y-1.5">
               <label htmlFor="ext-login-email" className="block text-sm font-medium text-slate-300">
                 Email
@@ -94,7 +94,7 @@ export default function ExternalLogin() {
               />
             </div>
 
-            {/* Password */}
+            
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-slate-300">
                 Password
@@ -108,7 +108,7 @@ export default function ExternalLogin() {
               </div>
             </div>
 
-            {/* Submit */}
+            
             <button
               type="submit"
               disabled={!isValid || submitting}
@@ -133,7 +133,7 @@ export default function ExternalLogin() {
             </button>
           </form>
 
-          {/* Bottom links */}
+          
           <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-slate-400">
               Belum punya akun?{' '}

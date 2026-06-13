@@ -1,5 +1,3 @@
-import React from 'react'
-import { Button } from './components/ui/button'
 import Navbar from './components/Navbar'
 import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
@@ -11,7 +9,7 @@ import RiskDashboard from './pages/RiskDashboard'
 import Analytics from './pages/Analytics'
 import Transactions from './pages/Transactions'
 
-// Auth pages
+
 import AuthLayout from './layouts/AuthLayout'
 import Login from './pages/auth/Login'
 import RegisterCooperative from './pages/auth/RegisterCooperative'
@@ -24,7 +22,7 @@ function App() {
   return (
     <div className="overflow-hidden font-sans bg-background">
       <Routes>
-        {/* ─── Auth Routes (no Navbar) ─── */}
+        
         <Route element={<AuthLayout />}>
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register-cooperative" element={<RegisterCooperative />} />
@@ -32,11 +30,11 @@ function App() {
           <Route path="/auth/setup-password" element={<SetupPassword />} />
         </Route>
 
-        {/* External auth routes render their own themed layout */}
+        
         <Route path="/auth/external/register" element={<ExternalRegister />} />
         <Route path="/auth/external/login" element={<ExternalLogin />} />
 
-        {/* ─── Main App Routes (with Navbar) ─── */}
+        
         <Route path="/*" element={
           <>
             <Navbar />

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Building2, UserPlus, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import AuthLogo from '@/components/auth/AuthLogo';
@@ -8,7 +8,7 @@ import FileUploader from '@/components/auth/FileUploader';
 
 const STEPS = ['Identitas Koperasi', 'Akun Admin'];
 
-// ─── Validation helpers ──────────────────────────
+
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -25,14 +25,14 @@ function validateSK(sk) {
   return sk.trim().length >= 5;
 }
 
-// ─── Step 1: Cooperative Identity ────────────────
+
 function StepCooperativeIdentity({ data, setData }) {
   return (
     <div
       className="space-y-5"
       style={{ animation: 'auth-fade-up 0.4s ease-out' }}
     >
-      {/* Section header */}
+      
       <div className="flex items-center gap-3 mb-2">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
           <Building2 className="w-5 h-5 text-primary" />
@@ -43,7 +43,7 @@ function StepCooperativeIdentity({ data, setData }) {
         </div>
       </div>
 
-      {/* Cooperative Name */}
+      
       <div className="space-y-1.5">
         <label htmlFor="coop-name" className="block text-sm font-medium text-foreground/80">
           Nama Koperasi <span className="text-red-400">*</span>
@@ -60,7 +60,7 @@ function StepCooperativeIdentity({ data, setData }) {
         />
       </div>
 
-      {/* Cooperative NIK */}
+      
       <div className="space-y-1.5">
         <label htmlFor="coop-nik" className="block text-sm font-medium text-foreground/80">
           NIK Koperasi <span className="text-red-400">*</span>
@@ -86,7 +86,7 @@ function StepCooperativeIdentity({ data, setData }) {
         )}
       </div>
 
-      {/* NIB */}
+      
       <div className="space-y-1.5">
         <label htmlFor="coop-nib" className="block text-sm font-medium text-foreground/80">
           NIB (Nomor Induk Berusaha) <span className="text-red-400">*</span>
@@ -112,7 +112,7 @@ function StepCooperativeIdentity({ data, setData }) {
         )}
       </div>
 
-      {/* Kemenkumham SK Number */}
+      
       <div className="space-y-1.5">
         <label htmlFor="coop-sk" className="block text-sm font-medium text-foreground/80">
           Nomor SK Kemenkumham <span className="text-red-400">*</span>
@@ -129,7 +129,7 @@ function StepCooperativeIdentity({ data, setData }) {
         />
       </div>
 
-      {/* Certificate Upload */}
+      
       <FileUploader
         id="coop-certificate"
         label={<>Sertifikat Koperasi <span className="text-red-400">*</span></>}
@@ -140,14 +140,14 @@ function StepCooperativeIdentity({ data, setData }) {
   );
 }
 
-// ─── Step 2: Admin Account ───────────────────────
+
 function StepAdminAccount({ data, setData }) {
   return (
     <div
       className="space-y-5"
       style={{ animation: 'auth-slide-in-right 0.4s ease-out' }}
     >
-      {/* Section header */}
+      
       <div className="flex items-center gap-3 mb-2">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
           <UserPlus className="w-5 h-5 text-primary" />
@@ -158,7 +158,7 @@ function StepAdminAccount({ data, setData }) {
         </div>
       </div>
 
-      {/* Admin Full Name */}
+      
       <div className="space-y-1.5">
         <label htmlFor="admin-name" className="block text-sm font-medium text-foreground/80">
           Nama Lengkap Admin <span className="text-red-400">*</span>
@@ -175,7 +175,7 @@ function StepAdminAccount({ data, setData }) {
         />
       </div>
 
-      {/* Email */}
+      
       <div className="space-y-1.5">
         <label htmlFor="admin-email" className="block text-sm font-medium text-foreground/80">
           Email Resmi <span className="text-red-400">*</span>
@@ -196,7 +196,7 @@ function StepAdminAccount({ data, setData }) {
         )}
       </div>
 
-      {/* Password */}
+      
       <PasswordInput
         id="admin-password"
         label={<>Password <span className="text-red-400">*</span></>}
@@ -205,7 +205,7 @@ function StepAdminAccount({ data, setData }) {
         showStrength
       />
 
-      {/* Confirm Password */}
+      
       <PasswordInput
         id="admin-confirm-password"
         label={<>Konfirmasi Password <span className="text-red-400">*</span></>}
@@ -221,7 +221,7 @@ function StepAdminAccount({ data, setData }) {
   );
 }
 
-// ─── Main Component ──────────────────────────────
+
 export default function RegisterCooperative() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -270,17 +270,17 @@ export default function RegisterCooperative() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-lg">
-        {/* Logo */}
+        
         <div className="flex justify-center mb-8" style={{ animation: 'auth-fade-up 0.3s ease-out' }}>
           <AuthLogo />
         </div>
 
-        {/* Card */}
+        
         <div
           className="auth-card rounded-2xl p-6 sm:p-8"
           style={{ animation: 'auth-fade-up 0.4s ease-out 0.1s both' }}
         >
-          {/* Title */}
+          
           <div className="text-center mb-6">
             <h1 className="text-xl font-bold text-foreground">Daftar Koperasi Baru</h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -288,17 +288,17 @@ export default function RegisterCooperative() {
             </p>
           </div>
 
-          {/* Step Indicator */}
+          
           <div className="mb-8">
             <StepIndicator steps={STEPS} currentStep={step} />
           </div>
 
-          {/* Form */}
+          
           <form onSubmit={handleSubmit}>
             {step === 0 && <StepCooperativeIdentity data={data} setData={setData} />}
             {step === 1 && <StepAdminAccount data={data} setData={setData} />}
 
-            {/* Navigation Buttons */}
+            
             <div className="flex items-center gap-3 mt-8">
               {step === 1 && (
                 <button
@@ -352,7 +352,7 @@ export default function RegisterCooperative() {
             </div>
           </form>
 
-          {/* Bottom link */}
+          
           <p className="text-center text-sm text-muted-foreground mt-6">
             Sudah punya akun?{' '}
             <Link to="/auth/login" className="text-primary font-semibold hover:underline">

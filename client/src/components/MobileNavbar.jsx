@@ -16,12 +16,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function MobileNavbar({ role = "auditor", user = true }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const loading = false;
-  const navigate = useNavigate();
 
   if (loading) return null;
 

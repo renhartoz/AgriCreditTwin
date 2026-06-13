@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react';
 import {
   Search,
   X,
@@ -12,7 +12,7 @@ import {
   Undo2
 } from 'lucide-react'
 
-// ─── Mock Audit Trail Data ─────────────────────────────────────
+
 const INITIAL_TRANSACTIONS = [
   {
     loanId: "LOAN-7F4B3C8A",
@@ -100,7 +100,7 @@ const INITIAL_TRANSACTIONS = [
   }
 ];
 
-// Helper to convert raw fieldName to human readable string
+
 const getFieldLabel = (fieldName) => {
   const mapping = {
     amount: "Nominal Pinjaman",
@@ -111,7 +111,7 @@ const getFieldLabel = (fieldName) => {
   return mapping[fieldName] || fieldName;
 };
 
-// Calculate time difference between two dates
+
 const getTimeDifference = (t1, t2) => {
   if (!t1 || !t2) return null;
   const d1 = new Date(t1);
@@ -121,7 +121,7 @@ const getTimeDifference = (t1, t2) => {
   return { hours: diffHours, ms: diffMs };
 };
 
-// Human-friendly gap string
+
 const formatTimeGap = (gapObj) => {
   if (!gapObj) return "N/A (Belum Cair)";
   const totalMinutes = Math.floor(gapObj.ms / (1000 * 60));
@@ -131,7 +131,7 @@ const formatTimeGap = (gapObj) => {
   return `${hours} Jam ${mins} Menit`;
 };
 
-// Format Timestamp helper
+
 const formatTimestamp = (isoString) => {
   if (!isoString) return "-";
   const date = new Date(isoString);
@@ -154,7 +154,7 @@ function Transactions() {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isSlideOpen, setIsSlideOpen] = useState(false);
 
-  // Compute calculated values per transaction
+  
   const computedTransactions = useMemo(() => {
     return transactions.map(item => {
       const timeGap = getTimeDifference(item.changedAt, item.disbursedAt);
@@ -163,7 +163,7 @@ function Transactions() {
     });
   }, [transactions]);
 
-  // Apply filters
+  
   const filteredTransactions = useMemo(() => {
     return computedTransactions.filter(item => {
       const matchesSearch = item.loanId.toLowerCase().includes(searchQuery.toLowerCase());
@@ -184,7 +184,7 @@ function Transactions() {
     });
   }, [computedTransactions, searchQuery, avsFilter, proximityFilter]);
 
-  // Summary Metrics
+  
   const metrics = useMemo(() => {
     const total = computedTransactions.length;
     const flagged = computedTransactions.filter(t => t.avsFlag).length;
@@ -214,7 +214,7 @@ function Transactions() {
     <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
-        {/* ── HEADER ─────────────────────────────────────────────── */}
+        
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
           <div>
             <div className="flex items-center gap-2.5">
@@ -239,9 +239,9 @@ function Transactions() {
           </div>
         </div>
 
-        {/* ── METRICS GRID ──────────────────────────────────────── */}
+        
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1 */}
+          
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
             <div className="flex justify-between items-start mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Log Audit</span>
@@ -250,7 +250,7 @@ function Transactions() {
             <p className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">{metrics.total}</p>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Seluruh siklus hidup pengajuan</p>
           </div>
-          {/* Card 2 */}
+          
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
             <div className="flex justify-between items-start mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Bendera Anomali</span>
@@ -259,7 +259,7 @@ function Transactions() {
             <p className="text-3xl font-extrabold text-rose-600 dark:text-rose-400 tracking-tight">{metrics.flagged}</p>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Diberi tanda investigasi lanjut</p>
           </div>
-          {/* Card 3 */}
+          
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
             <div className="flex justify-between items-start mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Modifikasi &lt; 24 Jam</span>
@@ -268,7 +268,7 @@ function Transactions() {
             <p className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 tracking-tight">{metrics.critical}</p>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Selisih waktu sangat dekat pencairan</p>
           </div>
-          {/* Card 4 */}
+          
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
             <div className="flex justify-between items-start mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Belum Dicairkan</span>
@@ -279,10 +279,10 @@ function Transactions() {
           </div>
         </div>
 
-        {/* ── FILTER BAR ────────────────────────────────────────── */}
+        
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl shadow-xs">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
-            {/* Search Input */}
+            
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
@@ -298,7 +298,7 @@ function Transactions() {
                 </button>
               )}
             </div>
-            {/* Filter selectors */}
+            
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 bg-slate-50/50 dark:bg-slate-950/40 px-3 py-1.5 border border-slate-200 dark:border-slate-700/80 rounded-xl">
                 <span className="text-xs text-slate-500 font-mono">AVS Flag:</span>
@@ -331,7 +331,7 @@ function Transactions() {
           </div>
         </div>
 
-        {/* ── DATA TABLE ────────────────────────────────────────── */}
+        
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -419,16 +419,16 @@ function Transactions() {
 
       </div>
 
-      {/* ── SLIDE-OVER PANEL ──────────────────────────────────────── */}
+      
       {isSlideOpen && selectedLoan && (
         <>
           <div onClick={() => setIsSlideOpen(false)} className="fixed inset-0 bg-black/30 backdrop-blur-xs z-40 transition-opacity duration-300" />
           <div className="fixed inset-y-0 right-0 w-full sm:max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-6 flex flex-col justify-between transition-transform duration-300 transform translate-x-0">
 
-            {/* Scrollable upper section */}
+            
             <div className="overflow-y-auto pr-1 flex-1 space-y-6">
 
-              {/* Panel Header */}
+              
               <div className="flex justify-between items-start border-b border-slate-200 dark:border-slate-800 pb-4">
                 <div>
                   <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-mono text-xs font-bold uppercase tracking-wider mb-1">
@@ -449,7 +449,7 @@ function Transactions() {
                 </button>
               </div>
 
-              {/* Delta Comparison Box */}
+              
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -473,7 +473,7 @@ function Transactions() {
                 </div>
               </div>
 
-              {/* Proximity Warning */}
+              
               {selectedLoan.status === "disbursed" && selectedLoan.isUnder24h && (
                 <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/40 p-4 rounded-xl text-rose-800 dark:text-rose-200 text-xs flex gap-3 items-start shadow-xs animate-pulse">
                   <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
@@ -486,7 +486,7 @@ function Transactions() {
                 </div>
               )}
 
-              {/* Proximity Timeline */}
+              
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
@@ -495,7 +495,7 @@ function Transactions() {
                 <div className="bg-slate-50/80 dark:bg-slate-950/40 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 relative">
                   <div className="absolute left-[29px] top-6 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-800" />
                   <div className="space-y-6 relative">
-                    {/* Node 1: Submission */}
+                    
                     <div className="flex gap-4">
                       <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 flex items-center justify-center shrink-0 relative z-10">
                         <div className="w-2.5 h-2.5 rounded-full bg-slate-400" />
@@ -505,7 +505,7 @@ function Transactions() {
                         <p className="text-[10px] text-slate-500 font-mono">{formatTimestamp(selectedLoan.createdAt)}</p>
                       </div>
                     </div>
-                    {/* Node 2: Modification */}
+                    
                     <div className="flex gap-4">
                       {selectedLoan.isUnder24h ? (
                         <div className="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950/60 border border-rose-400 dark:border-rose-500 flex items-center justify-center shrink-0 relative z-10 animate-pulse">
@@ -526,7 +526,7 @@ function Transactions() {
                         </span>
                       </div>
                     </div>
-                    {/* Node 3: Disbursement */}
+                    
                     {selectedLoan.status === "disbursed" ? (
                       <div className="flex gap-4">
                         <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-slate-800 border border-emerald-300 dark:border-slate-700 flex items-center justify-center shrink-0 relative z-10">
@@ -562,7 +562,7 @@ function Transactions() {
               </div>
             </div>
 
-            {/* Bottom Action */}
+            
             <div className="border-t border-slate-200 dark:border-slate-800 pt-4 mt-6 flex justify-between items-center gap-3">
               <button
                 type="button"
