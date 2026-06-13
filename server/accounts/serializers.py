@@ -17,3 +17,22 @@ class TenantRegistrationSerializer(serializers.Serializer):
 class StaffInvitationSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=150)
     email = serializers.EmailField()
+
+
+class SelfRegistrationSerializer(serializers.Serializer):
+    ROLE_CHOICES = [
+        ("admin", "Admin"),
+        ("investor", "Investor"),
+        ("auditor", "Auditor"),
+    ]
+
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+    role = serializers.ChoiceField(choices=ROLE_CHOICES)
+    tenant_id = serializers.UUIDField(required=False, allow_null=True, default=None)
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    uidb64 = serializers.CharField()
+    token = serializers.CharField()

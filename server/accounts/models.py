@@ -16,7 +16,13 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile",
     )
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="users")
+    tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.CASCADE,
+        related_name="users",
+        null=True,
+        blank=True,
+    )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="operator")
     nik = models.CharField(max_length=16, blank=True, default="")
 
