@@ -68,10 +68,10 @@ export default function ExternalRegister() {
               <Shield className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-wide font-mono">
+              <Link className="text-lg font-bold text-white tracking-wide font-mono" to={"/investor"}>
                 <span className="text-indigo-400">AgriCredit</span>
                 <span className="text-slate-300">Twin</span>
-              </h2>
+              </Link>
             </div>
           </div>
           <p className="text-xs text-slate-500 font-medium tracking-widest uppercase">
