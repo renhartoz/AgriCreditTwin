@@ -199,14 +199,10 @@ def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, e
 
     provision_tenant_schema(tenant)
 
-    import threading
-    def _send_email():
-        try:
-            send_cooperative_registration_email(coop_name, email, username)
-        except Exception:
-            logger.exception("Failed to send registration email to %s", email)
-
-    transaction.on_commit(lambda: threading.Thread(target=_send_email).start())
+    try:
+        send_cooperative_registration_email(coop_name, email, username)
+    except Exception:
+        logger.exception("Failed to send registration email to %s", email)
 
     return tenant, user
 
@@ -235,13 +231,9 @@ def invite_operator(tenant, name, email):
         role="operator",
     )
 
-    import threading
-    def _send_operator_email():
-        try:
-            send_operator_invitation(email, username, password)
-        except Exception:
-            logger.exception("Failed to send operator invitation to %s", email)
-
-    transaction.on_commit(lambda: threading.Thread(target=_send_operator_email).start())
+    try:
+        send_operator_invitation(email, username, password)
+    except Exception:
+        logger.exception("Failed to send operator invitation to %s", email)
 
     return user, password
