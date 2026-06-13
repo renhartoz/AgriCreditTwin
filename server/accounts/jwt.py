@@ -33,14 +33,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-
-        profile = getattr(self.user, "profile", None)
-        if profile and profile.tenant and not profile.tenant.is_verified:
-            raise serializers.ValidationError(
-                "Your cooperative account is pending verification by SuperAdmin. "
-                "You will receive an email once your account is approved."
-            )
-
         return data
 
     @classmethod

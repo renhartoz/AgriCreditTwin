@@ -177,7 +177,7 @@ def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, e
         sk_badan_hukum=sk_badan_hukum,
         nib=nib,
         verification_document=doc_path,
-        is_verified=settings.DEBUG,
+        is_verified=True,
     )
 
     user = User.objects.create_user(

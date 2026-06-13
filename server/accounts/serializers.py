@@ -6,9 +6,6 @@ class TenantRegistrationSerializer(serializers.Serializer):
     nomor_induk_koperasi = serializers.CharField(max_length=16)
     sk_badan_hukum = serializers.CharField(max_length=50)
     nib = serializers.CharField(max_length=13, required=False, default="")
-    verification_document = serializers.FileField(
-        required=False, allow_null=True, default=None, help_text="PDF certificate from Kemenkop UKM",
-    )
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8)
