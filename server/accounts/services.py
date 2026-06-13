@@ -123,7 +123,7 @@ def register_user(username, email, password, role, tenant=None):
         username=username,
         email=email,
         password=password,
-        is_active=False,
+        is_active=True,
     )
 
     UserProfile.objects.create(
@@ -131,11 +131,6 @@ def register_user(username, email, password, role, tenant=None):
         tenant=tenant,
         role=role,
     )
-
-    try:
-        send_activation_email(user)
-    except Exception:
-        logger.exception("Failed to send activation email to %s", email)
 
     return user
 

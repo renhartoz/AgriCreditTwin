@@ -139,13 +139,12 @@ class RegisterView(APIView):
     @extend_schema(
         summary="Self-Register (Admin / Investor / Auditor)",
         description=(
-            "Creates a new user account with is_active=False and dispatches an activation "
-            "email containing a secure one-time link. The user must click the link or submit "
-            "the token via /verify-email/ to activate the account."
+            "Creates a new user account with is_active=True. "
+            "The user can log in immediately after registration."
         ),
         request=SelfRegistrationSerializer,
         responses={
-            201: OpenApiResponse(description="Registration successful. Activation email sent."),
+            201: OpenApiResponse(description="Registration successful."),
             400: OpenApiResponse(description="Validation error or duplicate email/username."),
         },
         tags=["Auth"],
@@ -183,7 +182,7 @@ class RegisterView(APIView):
 
         return Response(
             {
-                "message": "Registration successful. Please check your email to activate your account.",
+                "message": "Registration successful. You may now log in.",
                 "username": user.username,
                 "email": user.email,
                 "role": data["role"],
