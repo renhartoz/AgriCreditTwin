@@ -74,7 +74,7 @@ class RegisterTenantView(APIView):
                 "schema_name": tenant.schema_name,
                 "username": user.username,
                 "role": "admin",
-                "is_verified": tenant.is_verified,
+                "is_verified": True,
             },
             status=status.HTTP_201_CREATED,
         )
