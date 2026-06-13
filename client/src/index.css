@@ -131,7 +131,7 @@
     }
 }
 
-/* ===== Auth Suite Animations ===== */
+
 @keyframes auth-float {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(15px, -20px) scale(1.03); }
@@ -168,7 +168,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Auth Card Glassmorphism ===== */
+
 .auth-card {
   background: oklch(1 0 0 / 70%);
   backdrop-filter: blur(20px) saturate(1.5);
@@ -188,7 +188,7 @@
     inset 0 1px 0 oklch(1 0 0 / 5%);
 }
 
-/* ===== Corporate Theme (Investor/Auditor Portal) ===== */
+
 .corporate-theme {
   --corp-bg: #0F172A;
   --corp-card: #1E293B;

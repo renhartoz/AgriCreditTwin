@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Save,
   Search,
@@ -21,7 +21,7 @@ import {
   Scale
 } from 'lucide-react'
 
-// ─── Mock Data ─────────────────────────────────────────────────
+
 const MOCK_MEMBERS = [
   { id: 'M-10023', name: 'Ahmad Dahlan', phone: '0812-3456-7890', group: 'Koptan Agro Makmur' },
   { id: 'M-10045', name: 'Dewi Sri Wahyuni', phone: '0813-9876-5432', group: 'Koptan Subur Jaya' },
@@ -83,7 +83,7 @@ const UNIT_OPTIONS = [
   { value: 'liter', label: 'Liter' }
 ]
 
-// ─── Helpers ───────────────────────────────────────────────────
+
 const formatNumberWithDots = (num) => {
   if (num === undefined || num === null || num === '') return ''
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -97,18 +97,20 @@ const todayISO = () => {
   return `${y}-${m}-${day}`
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  COMPONENT: MemberSmartCombobox
-// ═══════════════════════════════════════════════════════════════
+
+
+
 function MemberSmartCombobox({ value, onChange, members, error }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value ? `${value.name} (${value.id})` : '')
+  const [prevValue, setPrevValue] = useState(value)
   const inputRef = useRef(null)
   const wrapperRef = useRef(null)
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value)
     setQuery(value ? `${value.name} (${value.id})` : '')
-  }, [value])
+  }
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -211,18 +213,20 @@ function MemberSmartCombobox({ value, onChange, members, error }) {
   )
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  COMPONENT: CommoditySmartCombobox
-// ═══════════════════════════════════════════════════════════════
+
+
+
 function CommoditySmartCombobox({ value, onChange, commodities, error }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value || '')
+  const [prevValue, setPrevValue] = useState(value)
   const inputRef = useRef(null)
   const wrapperRef = useRef(null)
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value)
     setQuery(value || '')
-  }, [value])
+  }
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -318,7 +322,7 @@ function CommoditySmartCombobox({ value, onChange, commodities, error }) {
             ))
           ) : null}
 
-          {/* Create new commodity option */}
+          
           {query.trim() && !exactMatch && (
             <button
               type="button"
@@ -347,14 +351,14 @@ function CommoditySmartCombobox({ value, onChange, commodities, error }) {
   )
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  PAGE: DataEntry
-// ═══════════════════════════════════════════════════════════════
+
+
+
 function DataEntry() {
-  // ─── Tab State ───────────────────────────────────────────────
+  
   const [activeTab, setActiveTab] = useState('inventory')
 
-  // ─── Inventory Form States ──────────────────────────────────
+  
   const [commodityName, setCommodityName] = useState('')
   const [unitOfMeasurement, setUnitOfMeasurement] = useState('kg')
   const [mutationType, setMutationType] = useState('masuk')
@@ -364,7 +368,7 @@ function DataEntry() {
   const [commodityError, setCommodityError] = useState('')
   const [quantityError, setQuantityError] = useState('')
 
-  // Recent inventory log
+  
   const [recentInventory, setRecentInventory] = useState([
     { id: 1, commodity: 'Beras Premium', type: 'masuk', qty: 2500, unit: 'kg', date: '2026-06-12', desc: 'Penerimaan dari pabrik Subang' },
     { id: 2, commodity: 'Pupuk Urea', type: 'keluar', qty: 150, unit: 'kg', date: '2026-06-11', desc: 'Distribusi ke kelompok tani Blok A' },
@@ -374,7 +378,7 @@ function DataEntry() {
 
   const [isSavingInventory, setIsSavingInventory] = useState(false)
 
-  // --- Transaction form states ---
+  
   const [selectedMember, setSelectedMember] = useState(null)
   const [transactionType, setTransactionType] = useState('')
   const [selectedLoan, setSelectedLoan] = useState('')
@@ -382,18 +386,18 @@ function DataEntry() {
   const [description, setDescription] = useState('')
   const [transactionDate, setTransactionDate] = useState(todayISO())
 
-  // --- Validation Error States ---
+  
   const [memberError, setMemberError] = useState('')
   const [typeError, setTypeError] = useState('')
   const [loanError, setLoanError] = useState('')
   const [amountError, setAmountError] = useState('')
 
-  // UI status states
+  
   const [isSaving, setIsSaving] = useState(false)
   const [savedToast, setSavedToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
 
-  // Recent combined audit log list
+  
   const [recentTransactions, setRecentTransactions] = useState([
     { id: 1, member: { id: 'M-10023', name: 'Ahmad Dahlan' }, type: 'loan_disbursement', amount: 15000000, loanId: 'LN-2026-001A', date: '2026-06-12', description: 'Penyaluran dana saprodi panen' },
     { id: 2, member: { id: 'M-10045', name: 'Dewi Sri Wahyuni' }, type: 'savings_deposit', amount: 4500000, loanId: null, date: '2026-06-11', description: 'Tabungan hasil panen kuartal II' },
@@ -404,7 +408,7 @@ function DataEntry() {
   const isLoanRelated = transactionType === 'loan_disbursement' || transactionType === 'loan_repayment'
   const activeContracts = selectedMember ? (MOCK_LOAN_CONTRACTS[selectedMember.id] || []) : []
 
-  // ─── Inventory Handlers ─────────────────────────────────────
+  
   const handleSaveInventory = () => {
     setCommodityError('')
     setQuantityError('')
@@ -451,7 +455,7 @@ function DataEntry() {
     }, 600)
   }
 
-  // ─── Transaction Handlers ───────────────────────────────────
+  
   const handleTypeChange = (e) => {
     const val = e.target.value
     setTransactionType(val)
@@ -467,7 +471,7 @@ function DataEntry() {
     if (/[a-zA-Z]/.test(val)) {
       return 'Nominal hanya boleh berisi angka (tidak boleh mengandung huruf).'
     }
-    if (/[^0-9\-]/.test(val)) {
+    if (/[^0-9-]/.test(val)) {
       return 'Nominal harus berupa angka saja.'
     }
     const cleanDigits = val.replace(/\D/g, '')
@@ -582,7 +586,7 @@ function DataEntry() {
     return found ? found.label : val
   }
 
-  // ─── Tab Configurations ─────────────────────────────────────
+  
   const tabs = [
     {
       id: 'inventory',
@@ -608,7 +612,7 @@ function DataEntry() {
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 text-slate-800 dark:text-slate-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
-        {/* ── SECTION HEADER ────────────────────────────────────── */}
+        
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
@@ -630,7 +634,7 @@ function DataEntry() {
           </div>
         </div>
 
-        {/* ── TAB SWITCHER ──────────────────────────────────────── */}
+        
         <div className="bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex gap-1.5">
           {tabs.map(tab => (
             <button
@@ -649,22 +653,20 @@ function DataEntry() {
           ))}
         </div>
 
-        {/* ── TWO-COLUMN LAYOUT ─────────────────────────────────── */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-          {/* ════════════════════════════════════════════════════════
-              TAB 1: INVENTORY MUTATION FORM
-              ════════════════════════════════════════════════════════ */}
+          
           {activeTab === 'inventory' && (
             <>
-              {/* LEFT: Inventory Form */}
+              
               <div className="lg:col-span-7">
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs overflow-hidden">
                   <div className="h-1.5 w-full bg-emerald-600" />
 
                   <div className="p-6 space-y-6">
 
-                    {/* 1. Commodity Name (Smart Combobox) & Unit */}
+                    
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="sm:col-span-2 space-y-1.5">
                         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
@@ -708,7 +710,7 @@ function DataEntry() {
                       </div>
                     </div>
 
-                    {/* 2. Mutation Type (Segmented Control) */}
+                    
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                         <ArrowDownUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -748,7 +750,7 @@ function DataEntry() {
                       </div>
                     </div>
 
-                    {/* 3. Quantity & Date */}
+                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
@@ -799,7 +801,7 @@ function DataEntry() {
                       </div>
                     </div>
 
-                    {/* 4. Description */}
+                    
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 block">
                         <FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -814,7 +816,7 @@ function DataEntry() {
                       />
                     </div>
 
-                    {/* Submit button */}
+                    
                     <button
                       type="button"
                       onClick={handleSaveInventory}
@@ -838,10 +840,10 @@ function DataEntry() {
                 </div>
               </div>
 
-              {/* RIGHT: Inventory Log & Info */}
+              
               <div className="lg:col-span-5 space-y-6">
 
-                {/* Recent Inventory Feed */}
+                
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
                   <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
@@ -900,7 +902,7 @@ function DataEntry() {
                   </div>
                 </div>
 
-                {/* Inventory context panel */}
+                
                 <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs space-y-4">
                   <div className="flex items-center gap-2 mb-1 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                     <Package className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -926,19 +928,17 @@ function DataEntry() {
             </>
           )}
 
-          {/* ════════════════════════════════════════════════════════
-              TAB 2: FINANCIAL TRANSACTION FORM
-              ════════════════════════════════════════════════════════ */}
+          
           {activeTab === 'transaction' && (
             <>
-              {/* LEFT: Unified Transaction Form Card */}
+              
               <div className="lg:col-span-7">
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs overflow-hidden">
                   <div className="h-1.5 w-full bg-emerald-600" />
 
                   <div className="p-6 space-y-6">
 
-                    {/* 1. Select Member */}
+                    
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                         <Users className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -963,10 +963,10 @@ function DataEntry() {
                       )}
                     </div>
 
-                    {/* 2. Transaction Type Selection & 3. Loan (Conditional) */}
+                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                      {/* Transaction Type select */}
+                      
                       <div className={isLoanRelated ? "col-span-1 space-y-1.5" : "col-span-2 space-y-1.5"}>
                         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                           <ArrowDownUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -999,7 +999,7 @@ function DataEntry() {
                         )}
                       </div>
 
-                      {/* Loan Contract Selection */}
+                      
                       {isLoanRelated && (
                         <div className="col-span-1 space-y-1.5">
                           <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
@@ -1046,10 +1046,10 @@ function DataEntry() {
 
                     </div>
 
-                    {/* 4. Amount & Date Inputs */}
+                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                      {/* Amount input */}
+                      
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                           Nominal Transaksi (Rupiah) <span className="text-rose-500">*</span>
@@ -1084,7 +1084,7 @@ function DataEntry() {
                         <span className="text-[10px] text-slate-400 dark:text-slate-500">Maksimal 15 digit</span>
                       </div>
 
-                      {/* Transaction Date */}
+                      
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 block">
                           <CalendarDays className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -1102,7 +1102,7 @@ function DataEntry() {
 
                     </div>
 
-                    {/* 5. Description */}
+                    
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 block">
                         <FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -1117,7 +1117,7 @@ function DataEntry() {
                       />
                     </div>
 
-                    {/* Submit button */}
+                    
                     <button
                       type="button"
                       onClick={handleSaveTransaction}
@@ -1141,10 +1141,10 @@ function DataEntry() {
                 </div>
               </div>
 
-              {/* RIGHT: Audit Log Feed & Cooperative Financial Overview */}
+              
               <div className="lg:col-span-5 space-y-6">
 
-                {/* Audit Log Feed */}
+                
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
                   <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
@@ -1212,7 +1212,7 @@ function DataEntry() {
                   </div>
                 </div>
 
-                {/* General context stats */}
+                
                 <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs space-y-4">
                   <div className="flex items-center gap-2 mb-1 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                     <Landmark className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -1243,7 +1243,7 @@ function DataEntry() {
 
       </div>
 
-      {/* Success Notification */}
+      
       <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
         savedToast
           ? 'opacity-100 translate-y-0'

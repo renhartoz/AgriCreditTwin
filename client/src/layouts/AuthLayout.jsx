@@ -1,12 +1,11 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 
 export default function AuthLayout() {
   return (
     <div className="min-h-screen w-full bg-background relative overflow-hidden">
-      {/* Decorative background elements */}
+      
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large gradient orb - top right */}
+        
         <div
           className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-[0.07]"
           style={{
@@ -14,7 +13,7 @@ export default function AuthLayout() {
             animation: 'auth-float 20s ease-in-out infinite',
           }}
         />
-        {/* Medium gradient orb - bottom left */}
+        
         <div
           className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-[0.05]"
           style={{
@@ -22,7 +21,7 @@ export default function AuthLayout() {
             animation: 'auth-float 25s ease-in-out infinite reverse',
           }}
         />
-        {/* Subtle grid pattern */}
+        
         <div
           className="absolute inset-0 opacity-[0.015]"
           style={{
@@ -35,7 +34,7 @@ export default function AuthLayout() {
         />
       </div>
 
-      {/* Content */}
+      
       <div className="relative z-10 min-h-screen">
         <Outlet />
       </div>

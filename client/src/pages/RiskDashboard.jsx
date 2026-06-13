@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import {
   Search,
   X,
@@ -13,13 +13,11 @@ import {
   BarChart3,
   PieChart,
   Landmark,
-  Users,
   Sprout,
   Info,
   Building2,
   MapPin,
   BadgeCheck,
-  CircleDot,
   Zap
 } from 'lucide-react'
 import {
@@ -28,12 +26,10 @@ import {
   AreaChart,
   Area,
   Line,
-  LineChart,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ReferenceLine,
   BarChart,
   Bar,
@@ -41,11 +37,10 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar,
-  Cell
+  Radar
 } from 'recharts'
 
-// ─── Mock Cooperative Data ─────────────────────────────────────
+
 const COOPERATIVES_LIST = [
   {
     id: 'KOP-001',
@@ -264,7 +259,7 @@ const COOPERATIVES_LIST = [
   }
 ]
 
-// ─── Helpers ───────────────────────────────────────────────────
+
 const formatBillions = (val) => {
   if (val >= 1000000000) return `${(val / 1000000000).toFixed(1)} M`
   if (val >= 1000000) return `${(val / 1000000).toFixed(0)} Jt`
@@ -312,7 +307,7 @@ const getRiskConfig = (level) => {
   }
 }
 
-// ─── Custom Tooltip ────────────────────────────────────────────
+
 const ChartTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
@@ -340,9 +335,9 @@ const ChartTooltip = ({ active, payload, label }) => {
   return null
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  PAGE: Risk Dashboard
-// ═══════════════════════════════════════════════════════════════
+
+
+
 function RiskDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCooperative, setSelectedCooperative] = useState(COOPERATIVES_LIST[0])
@@ -351,7 +346,7 @@ function RiskDashboard() {
   const inputRef = useRef(null)
   const wrapperRef = useRef(null)
 
-  // Close dropdown on outside click
+  
   useEffect(() => {
     const handleClick = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -362,7 +357,7 @@ function RiskDashboard() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  // Instant filtering
+  
   const filteredCooperatives = useMemo(() => {
     if (!searchQuery.trim()) return COOPERATIVES_LIST
     return COOPERATIVES_LIST.filter(c =>
@@ -392,7 +387,7 @@ function RiskDashboard() {
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 text-slate-800 dark:text-slate-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
-        {/* ── PAGE HEADER ──────────────────────────────────────── */}
+        
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
@@ -411,12 +406,12 @@ function RiskDashboard() {
           </div>
         </div>
 
-        {/* ── COOPERATIVE SELECTOR ─────────────────────────────── */}
+        
         <div className="relative" ref={wrapperRef}>
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
 
-              {/* Search Input */}
+              
               <div className="flex-1 relative">
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-2">
                   <Building2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -436,7 +431,7 @@ function RiskDashboard() {
                     }}
                     onFocus={() => setDropdownOpen(true)}
                   />
-                  {/* Clear + Chevron */}
+                  
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                     {(searchQuery || selectedCooperative) && (
                       <button
@@ -460,7 +455,7 @@ function RiskDashboard() {
                   </div>
                 </div>
 
-                {/* Dropdown Popover */}
+                
                 {dropdownOpen && (
                   <div className="absolute z-50 w-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl shadow-slate-200/50 dark:shadow-black/30 overflow-hidden max-h-80 overflow-y-auto">
                     {filteredCooperatives.length > 0 ? (
@@ -524,7 +519,7 @@ function RiskDashboard() {
                 )}
               </div>
 
-              {/* Active Cooperative Badge */}
+              
               <div className="md:w-auto shrink-0">
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2 md:text-right">
                   Koperasi Aktif
@@ -550,11 +545,11 @@ function RiskDashboard() {
           </div>
         </div>
 
-        {/* ── RISK KPI CARDS ───────────────────────────────────── */}
+        
         <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-300 ${
           isTransitioning ? 'opacity-40 translate-y-1' : 'opacity-100 translate-y-0'
         }`}>
-          {/* PD Card */}
+          
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -568,7 +563,7 @@ function RiskDashboard() {
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Simulasi Monte Carlo 250 siklus</p>
           </div>
 
-          {/* LDR Card */}
+          
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -584,7 +579,7 @@ function RiskDashboard() {
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Loan-to-Deposit Ratio</p>
           </div>
 
-          {/* NPL Card */}
+          
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -600,7 +595,7 @@ function RiskDashboard() {
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Non-Performing Loan Ratio</p>
           </div>
 
-          {/* Total Loans Card */}
+          
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -615,12 +610,12 @@ function RiskDashboard() {
           </div>
         </div>
 
-        {/* ── CHARTS GRID ──────────────────────────────────────── */}
+        
         <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-300 ${
           isTransitioning ? 'opacity-40 translate-y-1' : 'opacity-100 translate-y-0'
         }`}>
 
-          {/* Chart 1: Monte Carlo PD Trend */}
+          
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
@@ -678,7 +673,7 @@ function RiskDashboard() {
             </div>
           </div>
 
-          {/* Chart 2: Liquidity Stress Test */}
+          
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
@@ -715,7 +710,7 @@ function RiskDashboard() {
             </div>
           </div>
 
-          {/* Chart 3: Liquidity Trend */}
+          
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
@@ -767,7 +762,7 @@ function RiskDashboard() {
             </div>
           </div>
 
-          {/* Chart 4: Risk Radar */}
+          
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
@@ -809,7 +804,7 @@ function RiskDashboard() {
 
         </div>
 
-        {/* ── COOPERATIVE DETAIL PANEL ──────────────────────────── */}
+        
         <div className={`bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs transition-all duration-300 ${
           isTransitioning ? 'opacity-40' : 'opacity-100'
         }`}>

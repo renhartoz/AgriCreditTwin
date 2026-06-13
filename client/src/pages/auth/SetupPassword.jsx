@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import AuthLogo from '@/components/auth/AuthLogo';
@@ -8,7 +8,7 @@ export default function SetupPassword() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Simulated pre-fill from invitation URL
+  
   const email = searchParams.get('email') || 'operator.lapangan@koperasi.co.id';
   const cooperativeName = searchParams.get('coop') || 'Koperasi Melati Jaya';
   const roleName = searchParams.get('role') || 'Operator Lapangan';
@@ -33,17 +33,17 @@ export default function SetupPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
-        {/* Logo */}
+        
         <div className="flex justify-center mb-8" style={{ animation: 'auth-fade-up 0.3s ease-out' }}>
           <AuthLogo />
         </div>
 
-        {/* Card */}
+        
         <div
           className="auth-card rounded-2xl p-6 sm:p-8"
           style={{ animation: 'auth-fade-up 0.4s ease-out 0.1s both' }}
         >
-          {/* Contextual Header */}
+          
           <div className="text-center mb-7">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4">
               <ShieldCheck className="w-6 h-6 text-primary" />
@@ -60,7 +60,7 @@ export default function SetupPassword() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email (read-only) */}
+            
             <div className="space-y-1.5">
               <label htmlFor="setup-email" className="block text-sm font-medium text-foreground/80">
                 Email
@@ -78,7 +78,7 @@ export default function SetupPassword() {
               </p>
             </div>
 
-            {/* New Password */}
+            
             <PasswordInput
               id="setup-password"
               label={<>Password Baru <span className="text-red-400">*</span></>}
@@ -87,7 +87,7 @@ export default function SetupPassword() {
               showStrength
             />
 
-            {/* Confirm Password */}
+            
             <PasswordInput
               id="setup-confirm-password"
               label={<>Konfirmasi Password <span className="text-red-400">*</span></>}
@@ -100,7 +100,7 @@ export default function SetupPassword() {
               }
             />
 
-            {/* Submit */}
+            
             <button
               type="submit"
               disabled={!isValid || submitting}
@@ -122,7 +122,7 @@ export default function SetupPassword() {
             </button>
           </form>
 
-          {/* Security note */}
+          
           <div className="mt-6 p-3 rounded-xl bg-muted/40 border border-border/60">
             <p className="text-xs text-muted-foreground text-center leading-relaxed">
               🔒 Tautan undangan ini bersifat satu kali pakai dan akan kedaluwarsa dalam 48 jam.

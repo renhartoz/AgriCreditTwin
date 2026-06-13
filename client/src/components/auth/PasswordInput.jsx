@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 function getStrength(password) {

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Upload, FileText, Image, X, AlertCircle } from 'lucide-react';
 
 const ACCEPTED_TYPES = {
@@ -7,7 +7,7 @@ const ACCEPTED_TYPES = {
   'image/png': { label: 'PNG', icon: Image },
 };
 
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 5 * 1024 * 1024; 
 
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -83,7 +83,7 @@ export default function FileUploader({ id, label, value, onChange, error: extern
       )}
 
       {!value ? (
-        /* Drop zone */
+        
         <div
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -131,7 +131,7 @@ export default function FileUploader({ id, label, value, onChange, error: extern
           />
         </div>
       ) : (
-        /* File preview */
+        
         <div className="flex items-center gap-3 p-3.5 rounded-xl border border-primary/20 bg-primary/[0.03]">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
             <FileIcon className="w-5 h-5" />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, ArrowRight, Info } from 'lucide-react';
 import AuthLogo from '@/components/auth/AuthLogo';
@@ -21,21 +21,21 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex">
-      {/* ─── Left Panel: Hero Image ─── */}
+      
       <div className="hidden lg:flex lg:w-[55%] xl:w-[60%] relative overflow-hidden">
-        {/* Background image */}
+        
         <img
           src="/auth-hero.png"
           alt="Indonesian agriculture landscape"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Gradient overlay */}
+        
         <div className="absolute inset-0"
           style={{
             background: 'linear-gradient(135deg, rgba(13,39,28,0.85) 0%, rgba(45,106,79,0.7) 50%, rgba(13,39,28,0.8) 100%)',
           }}
         />
-        {/* Decorative mesh */}
+        
         <div className="absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage: `
@@ -46,9 +46,9 @@ export default function Login() {
           }}
         />
 
-        {/* Content */}
+        
         <div className="relative z-10 flex flex-col justify-between p-10 xl:p-14 w-full">
-          {/* Top: Logo */}
+          
           <div>
             <div className="flex items-center gap-3">
               <img className="w-12 h-12 rounded-lg" src="/logo.png" alt="Logo" />
@@ -59,7 +59,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Center: Brand copy */}
+          
           <div className="max-w-md">
             <h1 className="text-3xl xl:text-4xl font-bold text-white leading-tight mb-4">
               Digital Twin untuk{' '}
@@ -72,7 +72,7 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Bottom: Decorative stats */}
+          
           <div className="flex gap-8">
             <div>
               <p className="text-2xl font-bold text-[#7FFF00]">500+</p>
@@ -90,15 +90,15 @@ export default function Login() {
         </div>
       </div>
 
-      {/* ─── Right Panel: Login Form ─── */}
+      
       <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-background">
         <div className="w-full max-w-sm">
-          {/* Mobile logo (hidden on desktop) */}
+          
           <div className="flex justify-center mb-8 lg:hidden" style={{ animation: 'auth-fade-up 0.3s ease-out' }}>
             <AuthLogo />
           </div>
 
-          {/* Form header */}
+          
           <div className="mb-8" style={{ animation: 'auth-fade-up 0.3s ease-out' }}>
             <h1 className="text-2xl font-bold text-foreground mb-1">Selamat Datang</h1>
             <p className="text-sm text-muted-foreground">
@@ -107,7 +107,7 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5" style={{ animation: 'auth-fade-up 0.4s ease-out 0.1s both' }}>
-            {/* Email */}
+            
             <div className="space-y-1.5">
               <label htmlFor="login-email" className="block text-sm font-medium text-foreground/80">
                 Email
@@ -124,7 +124,7 @@ export default function Login() {
               />
             </div>
 
-            {/* Password */}
+            
             <PasswordInput
               id="login-password"
               label="Password"
@@ -132,7 +132,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            {/* Remember me */}
+            
             <div className="flex items-center justify-between">
               <label htmlFor="login-remember" className="flex items-center gap-2.5 cursor-pointer group">
                 <div className="relative">
@@ -166,7 +166,7 @@ export default function Login() {
               </a>
             </div>
 
-            {/* Submit */}
+            
             <button
               type="submit"
               disabled={!isValid || submitting}
@@ -191,7 +191,7 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Developer note badge */}
+          
           <div
             className="mt-6 p-3 rounded-xl border border-dashed border-amber-300/40 bg-amber-50/50"
             style={{ animation: 'auth-fade-up 0.4s ease-out 0.2s both' }}
@@ -207,7 +207,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Bottom links */}
+          
           <div
             className="mt-6 text-center space-y-3"
             style={{ animation: 'auth-fade-up 0.4s ease-out 0.3s both' }}

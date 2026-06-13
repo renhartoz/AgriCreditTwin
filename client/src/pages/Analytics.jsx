@@ -1,18 +1,14 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import {
   TrendingUp,
-  TrendingDown,
-  Layers,
   ShieldCheck,
   Warehouse,
   Coins,
   Users,
   Award,
-  Info,
   ChevronDown,
   Check,
   Lock,
-  RefreshCw,
   FileSpreadsheet,
   Activity,
   ArrowUpRight,
@@ -32,11 +28,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  Legend
+  Tooltip
 } from 'recharts'
 
-// ─── MOCK DATA PER COOPERATIVE AND AGGREGATE ───────────────────
+
 const COOPERATIVES_DATA = {
   ALL: {
     id: 'AGG-000',
@@ -463,7 +458,7 @@ const COOPERATIVES_DATA = {
   }
 }
 
-// Helper function for formatted currency
+
 const formatCurrencyPremium = (value) => {
   if (value >= 1000000000) {
     return (value / 1000000000).toFixed(2) + ' Milyar'
@@ -474,7 +469,7 @@ const formatCurrencyPremium = (value) => {
   return value.toLocaleString('id-ID')
 }
 
-// Helper component to display currency beautifully aligned and centered
+
 const CurrencyDisplay = ({ value }) => {
   const parts = useMemo(() => {
     if (value >= 1000000000) {
@@ -488,11 +483,11 @@ const CurrencyDisplay = ({ value }) => {
 
   return (
     <div className="flex items-center gap-2 mt-2.5">
-      {/* Redesigned clean text instead of squeezed badge */}
+      
       <span className="text-base font-semibold text-muted-foreground mr-0.5">
         Rp
       </span>
-      {/* Value and Suffix aligned cleanly */}
+      
       <div className="flex items-center gap-1.5">
         <span className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
           {parts.num}
@@ -507,6 +502,34 @@ const CurrencyDisplay = ({ value }) => {
   )
 }
 
+const FinancialTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-card/95 border border-border p-3.5 rounded-xl shadow-lg text-xs text-card-foreground backdrop-blur-xs">
+        <p className="font-bold border-b border-border/50 pb-1.5 mb-1.5">{label}</p>
+        <div className="space-y-1">
+          {payload.map((entry, idx) => (
+            <div key={idx} className="flex justify-between items-center gap-4">
+              <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                {entry.name}
+              </span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">
+                {entry.name?.includes('Rate') || entry.name?.includes('%') || entry.name?.includes('Velocity')
+                  ? `${entry.value.toFixed(1)}%`
+                  : entry.value >= 1000000
+                  ? `Rp ${entry.value.toLocaleString('id-ID')}`
+                  : entry.value.toLocaleString('id-ID')}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  return null
+}
+
 function Analytics() {
   const [selectedKey, setSelectedKey] = useState('ALL')
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -515,7 +538,7 @@ function Analytics() {
     return COOPERATIVES_DATA[selectedKey]
   }, [selectedKey])
 
-  // Calculate dynamic warehouse valuation: sum(Quantity Tons * 1000 * marketPriceKg)
+  
   const calculatedInventoryValuation = useMemo(() => {
     return activeData.inventoryList.reduce((acc, curr) => {
       const itemValue = curr.qtyTons * 1000 * curr.marketPriceKg
@@ -523,7 +546,7 @@ function Analytics() {
     }, 0)
   }, [activeData])
 
-  // Top Commodities Donut Chart Data preparation
+  
   const commoditiesDonutData = useMemo(() => {
     const total = activeData.inventoryList.reduce((acc, curr) => {
       return acc + (curr.qtyTons * 1000 * curr.marketPriceKg)
@@ -542,40 +565,11 @@ function Analytics() {
     })
   }, [activeData])
 
-  // Custom tooltips styled to match standard page fonts
-  const FinancialTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-card/95 border border-border p-3.5 rounded-xl shadow-lg text-xs text-card-foreground backdrop-blur-xs">
-          <p className="font-bold border-b border-border/50 pb-1.5 mb-1.5">{label}</p>
-          <div className="space-y-1">
-            {payload.map((entry, idx) => (
-              <div key={idx} className="flex justify-between items-center gap-4">
-                <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                  {entry.name}
-                </span>
-                <span className="font-bold text-slate-900 dark:text-slate-100">
-                  {entry.name?.includes('Rate') || entry.name?.includes('%') || entry.name?.includes('Velocity')
-                    ? `${entry.value.toFixed(1)}%`
-                    : entry.value >= 1000000
-                    ? `Rp ${entry.value.toLocaleString('id-ID')}`
-                    : entry.value.toLocaleString('id-ID')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )
-    }
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-200 animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
-        {/* ── HEADER & THEME-COMPLIANT CONTROL BAR ─────────────────── */}
+        
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
           <div>
             <div className="flex items-center gap-2.5">
@@ -590,13 +584,13 @@ function Analytics() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {/* Anonymity Compliant Badge */}
+            
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-450 text-xs font-semibold">
               <Lock className="w-3.5 h-3.5" />
               <span>Agregat Anonim (Tanpa NIK/KTP)</span>
             </div>
 
-            {/* Cooperative Selector Dropdown */}
+            
             <div className="relative">
               <button
                 type="button"
@@ -664,7 +658,7 @@ function Analytics() {
           </div>
         </div>
 
-        {/* ── SECTION 1: Capital Utilization & Returns (Financial Grid) ── */}
+        
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-2">
             <Coins className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -673,9 +667,9 @@ function Analytics() {
             </h2>
           </div>
 
-          {/* Metric Cards Grid */}
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {/* Card 1: Total Disbursed */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200 group">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
@@ -691,7 +685,7 @@ function Analytics() {
               </div>
             </div>
 
-            {/* Card 2: Average Ticket Size */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
@@ -705,7 +699,7 @@ function Analytics() {
               </div>
             </div>
 
-            {/* Card 3: On-Time Repayment Rate */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
@@ -726,7 +720,7 @@ function Analytics() {
               </div>
             </div>
 
-            {/* Card 4: Restructuring Effectiveness */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
@@ -748,9 +742,9 @@ function Analytics() {
             </div>
           </div>
 
-          {/* Section 1 Charts Grid */}
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Line/Area Chart: Disbursement Velocity */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 gap-2">
                 <div>
@@ -803,7 +797,7 @@ function Analytics() {
               </div>
             </div>
 
-            {/* Bar Chart: Net Revenue Trend */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 gap-2">
                 <div>
@@ -849,7 +843,7 @@ function Analytics() {
           </div>
         </div>
 
-        {/* ── SECTION 2: General Asset & Inventory Analytics ─────────────── */}
+        
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-2">
             <Warehouse className="w-5 h-5 text-sky-600 dark:text-sky-400" />
@@ -859,10 +853,10 @@ function Analytics() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Metric Cards + Valuation Spreadsheet */}
+            
             <div className="lg:col-span-2 space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* Total Inventory Valuation Card */}
+                
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
@@ -876,7 +870,7 @@ function Analytics() {
                   </div>
                 </div>
 
-                {/* Inventory Turnover Rate Card */}
+                
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 shadow-xs transition-all duration-200">
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
@@ -898,7 +892,7 @@ function Analytics() {
                 </div>
               </div>
 
-              {/* Dynamic Spreadsheet Table */}
+              
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xs overflow-hidden">
                 <div className="p-4 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/20 flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -957,7 +951,7 @@ function Analytics() {
               </div>
             </div>
 
-            {/* Donut Chart: Top Commodities by Value */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between">
               <div className="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <h3 className="font-bold text-slate-950 dark:text-slate-100 text-sm flex items-center gap-1.5">
@@ -991,14 +985,14 @@ function Analytics() {
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                {/* Central Info Badge */}
+                
                 <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
                   <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-semibold">Aset Fisik</span>
                   <span className="text-xs font-bold text-sky-600 dark:text-sky-400">{activeData.inventoryList.length} Barang</span>
                 </div>
               </div>
 
-              {/* Legends with detailed subtext */}
+              
               <div className="mt-4 space-y-2.5 border-t border-slate-100 dark:border-slate-800/80 pt-3.5">
                 {commoditiesDonutData.map((item, index) => (
                   <div key={index} className="flex items-center justify-between text-[11px]">
@@ -1017,7 +1011,7 @@ function Analytics() {
           </div>
         </div>
 
-        {/* ── SECTION 3: Ecosystem Growth & Health ──────────────────── */}
+        
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-850 pb-2">
             <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -1027,7 +1021,7 @@ function Analytics() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Chart 1: Member Acquisition Trend */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 gap-2">
                 <div>
@@ -1074,7 +1068,7 @@ function Analytics() {
               </div>
             </div>
 
-            {/* Chart 2: Data Completeness Growth */}
+            
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-5 rounded-2xl shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 gap-2">
                 <div>
@@ -1122,7 +1116,7 @@ function Analytics() {
           </div>
         </div>
 
-        {/* ── FOOTER AUDIT TRUST MARK ──────────────────────────────── */}
+        
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-200 dark:border-slate-900/60 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
