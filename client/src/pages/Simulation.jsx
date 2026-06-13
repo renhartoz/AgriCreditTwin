@@ -27,7 +27,7 @@ import {
   Legend,
   ReferenceLine
 } from 'recharts'
-import { getTrustScore } from '../services/simulationService.js'
+import { getTrustScore, runCashflowProjection } from '../services/simulationService.js'
 
 const COMMODITY_PRICES = {
   'Rice': 6500000,
@@ -366,25 +366,47 @@ function Simulation() {
     }
   }
 
-  const runStochasticSimulation = () => {
+  const runStochasticSimulation = async () => {
     setIsSimulating(true)
 
-    setTimeout(() => {
-      const results = calculateSimulation({
+    try {
+      const result = await runCashflowProjection({
         tenor: Number(loanTenor) || 12,
         amount: Number(loanAmount) || 0,
-        declaredYield: Number(declaredYield) || 0,
-        livingCost: Number(livingCost) || 0,
-        farmingCost: Number(farmingCost) || 0,
+        declared_yield: Number(declaredYield) || 0,
+        living_cost: Number(livingCost) || 0,
+        farming_cost: Number(farmingCost) || 0,
         commodity,
-        plantingMonth,
-        harvestMonth
+        planting_month: plantingMonth,
+        harvest_month: harvestMonth,
       })
 
-      setSimResults(results)
-      setIsSimulating(false)
+      let recommendationColor
+      if (result.risk_level === 'LOW') {
+        recommendationColor = 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-300'
+      } else if (result.risk_level === 'WARNING') {
+        recommendationColor = 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-800/40 dark:text-emerald-300'
+      } else {
+        recommendationColor = 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-800/40 dark:text-red-300'
+      }
+
+      setSimResults({
+        chartData: result.chart_data,
+        pd: String(result.pd),
+        riskLevel: result.risk_level,
+        recommendationText: result.recommendation,
+        recommendationColor,
+        expectedRevenue: result.expected_revenue,
+        expectedOutflow: result.expected_outflow,
+        expectedNetBalance: result.expected_net_balance,
+        iterations: result.iterations,
+      })
       setHasRun(true)
-    }, 800)
+    } catch (err) {
+      console.error('Simulation failed:', err)
+    } finally {
+      setIsSimulating(false)
+    }
   }
 
   return (
@@ -759,7 +781,7 @@ function Simulation() {
                       Simulasi Siap Dijalankan
                     </p>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Klik tombol "Jalankan Simulasi Kredit" untuk memproses 250 iterasi siklus tanam stokastik berdasarkan parameter yang Anda masukkan.
+                      Klik tombol "Jalankan Simulasi Kredit" untuk memproses 1.000 iterasi Monte Carlo dari server berdasarkan parameter yang Anda masukkan.
                     </p>
                   </div>
                 </div>
@@ -774,7 +796,7 @@ function Simulation() {
                       Menghitung Arus Kas
                     </p>
                     <p className="text-xs text-slate-400 animate-pulse">
-                      Membuat proyeksi hasil panen dan volatilitas harga pasar...
+                      Membuat 1.000 proyeksi arus kas dengan simulasi Monte Carlo...
                     </p>
                   </div>
                 </div>
@@ -948,7 +970,7 @@ function Simulation() {
                 </h4>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Proyeksi arus kas ini disimulasikan secara dinamis sebanyak 250 kali. Pada bulan panen yang dipilih, kas disuntikkan berdasarkan estimasi hasil panen dengan variasi harga komoditas pasar. Setiap bulan, biaya hidup dan biaya tani dikurangi bersama angsuran pinjaman pokok beserta bunga flat 0,5%.
+                Proyeksi arus kas ini disimulasikan secara dinamis sebanyak 1.000 kali menggunakan metode Monte Carlo di server. Pada bulan panen yang dipilih, kas disuntikkan berdasarkan estimasi hasil panen dengan variasi harga komoditas pasar. Setiap bulan, biaya hidup dan biaya tani dikurangi bersama angsuran pinjaman pokok beserta bunga flat 0,5%.
               </p>
               <div className="text-[10px] font-mono text-slate-400 dark:text-slate-500 space-y-1 bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-lg border border-slate-200/50 dark:border-slate-800/80">
                 <div>• Pemasukan Panen = Estimasi Hasil Panen (Ton) × Harga Pasar</div>

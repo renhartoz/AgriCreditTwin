@@ -35,12 +35,14 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [portfolioError, setPortfolioError] = useState(null)
 
-  const [tenantName, setTenantName] = useState('Koperasi Padiwangi Utama')
-  const [activeMembersCount, setActiveMembersCount] = useState(1248)
-  const [totalDefaultedAmount, setTotalDefaultedAmount] = useState(124500000)
-  const [totalDefaultedCount, setTotalDefaultedCount] = useState(12)
-  const [totalOutstandingLoans, setTotalOutstandingLoans] = useState(1842500000)
-  const [totalSavings, setTotalSavings] = useState(420700000)
+  const [tenantName, setTenantName] = useState('Koperasi')
+  const [activeMembersCount, setActiveMembersCount] = useState(0)
+  const [totalDefaultedAmount, setTotalDefaultedAmount] = useState(0)
+  const [totalDefaultedCount, setTotalDefaultedCount] = useState(0)
+  const [totalOutstandingLoans, setTotalOutstandingLoans] = useState(0)
+  const [totalSavings, setTotalSavings] = useState(0)
+  const [highRiskLoans, setHighRiskLoans] = useState([])
+  const [recentLogs, setRecentLogs] = useState([])
 
   useEffect(() => {
     let cancelled = false
@@ -50,16 +52,20 @@ function Dashboard() {
         const data = await getPortfolio()
         if (cancelled) return
         if (data.tenant_name) setTenantName(data.tenant_name)
-        if (data.total_loans != null) setActiveMembersCount(data.total_loans)
+        if (data.active_members != null) setActiveMembersCount(data.active_members)
         if (data.total_disbursed != null) setTotalOutstandingLoans(parseFloat(data.total_disbursed))
-        if (data.npl_rate != null) {
-          const defaultedCount = Math.round((data.npl_rate || 0) * (data.total_loans || 0))
-          setTotalDefaultedCount(defaultedCount)
-        }
+        if (data.total_defaulted_amount != null) setTotalDefaultedAmount(parseFloat(data.total_defaulted_amount))
+        if (data.total_savings != null) setTotalSavings(parseFloat(data.total_savings))
         if (data.loan_status_breakdown) {
           const sb = data.loan_status_breakdown
           if (sb.defaulted != null) setTotalDefaultedCount(sb.defaulted)
         }
+        if (data.npl_rate != null && data.total_loans) {
+          const estimated = Math.round((data.npl_rate || 0) * (data.total_loans || 0))
+          setTotalDefaultedCount(prev => prev || estimated)
+        }
+        if (Array.isArray(data.high_risk_loans)) setHighRiskLoans(data.high_risk_loans)
+        if (Array.isArray(data.recent_logs)) setRecentLogs(data.recent_logs)
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to fetch portfolio:', err)
@@ -72,14 +78,6 @@ function Dashboard() {
     fetchPortfolio()
     return () => { cancelled = true }
   }, [])
-
-  const highRiskLoans = [
-    { id: 'LN-2026-004A', memberName: 'Slamet Rahardjo', pd: 78.4, status: 'approved', deficitMonth: 'Juli 2026' },
-    { id: 'LN-2026-012B', memberName: 'Ni Made Astuti', pd: 64.1, status: 'restructured', deficitMonth: 'Juli 2026' },
-    { id: 'LN-2025-089C', memberName: 'Kuswanto', pd: 59.2, status: 'approved', deficitMonth: 'Juli 2026' },
-    { id: 'LN-2026-045X', memberName: 'Siti Aminah', pd: 51.5, status: 'pending', deficitMonth: 'Agustus 2026' },
-    { id: 'LN-2025-112Y', memberName: 'Joko Susilo', pd: 92.0, status: 'defaulted', deficitMonth: 'Defisit Segera' }
-  ]
 
   const seasonalCashFlowData = [
     { name: 'Jan', HarvestCycle: 20, CashInflow: 45 },
@@ -118,14 +116,6 @@ function Dashboard() {
     name: c.name,
     volume: c.volume
   }))
-
-  const recentLogs = [
-    { time: '14:32 Hari Ini', text: 'Petugas Ahmad mendaftarkan petani Slamet Rahardjo (Luas: 3.4 Ha, Komoditas: Padi)' },
-    { time: '11:15 Hari Ini', text: 'Simulasi arus kas digital dijalankan untuk kontrak LN-2026-004A' },
-    { time: 'Kemarin', text: 'Peringatan mitigasi defisit ditandai untuk siklus tanaman Juli (Blok Tani Makmur)' },
-    { time: '2 hari lalu', text: 'Data satelit kesehatan vegetasi NDVI diperbarui untuk lahan Bumi Lestari' },
-    { time: '3 hari lalu', text: 'Petugas Hendra memverifikasi batas lahan untuk 12 pemohon di Parung' }
-  ]
 
   const formatNumberWithDots = (num) => {
     if (num === undefined || num === null || num === '') return '0'
@@ -403,9 +393,16 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                {highRiskLoans.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-10 text-center text-slate-400 dark:text-slate-500 text-sm">
+                      Belum ada pinjaman berisiko tinggi terdeteksi.
+                    </td>
+                  </tr>
+                )}
                 {highRiskLoans.map((loan) => (
                   <tr key={loan.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/30 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100">{loan.memberName}</td>
+                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100">{loan.member_name}</td>
                     <td className="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400">{loan.id}</td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
@@ -420,7 +417,7 @@ function Dashboard() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-450">{loan.deficitMonth}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-450">{loan.deficit_month}</td>
                     <td className="px-6 py-4">{getStatusBadge(loan.status)}</td>
                     <td className="px-6 py-4 text-right">
                       <Link to={`/simulation?loan_id=${loan.id}&amount=${loan.pd > 80 ? 100000000 : 150000000}`}>
@@ -502,6 +499,9 @@ function Dashboard() {
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Aktivitas Lapangan Terbaru</h3>
             </div>
             <div className="relative border-l border-slate-200 dark:border-slate-800 pl-4 ml-2 space-y-6 py-2">
+              {recentLogs.length === 0 && (
+                <p className="text-sm text-slate-400 dark:text-slate-500 py-4">Belum ada aktivitas tercatat.</p>
+              )}
               {recentLogs.map((log, idx) => (
                 <div key={idx} className="relative group">
                   <div className="absolute -left-[21px] mt-1.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-600 group-hover:scale-110 transition-transform shadow-xs" />

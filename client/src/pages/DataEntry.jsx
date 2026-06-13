@@ -20,18 +20,10 @@ import {
   Plus,
   Scale
 } from 'lucide-react'
-import { applyLoan } from '../services/loanService.js'
+import { applyLoan, getMembers } from '../services/loanService.js'
 
 
-const MOCK_MEMBERS = [
-  { id: 'M-10023', name: 'Ahmad Dahlan', phone: '0812-3456-7890', group: 'Koptan Agro Makmur' },
-  { id: 'M-10045', name: 'Dewi Sri Wahyuni', phone: '0813-9876-5432', group: 'Koptan Subur Jaya' },
-  { id: 'M-20108', name: 'Bambang Triyono', phone: '0821-4567-8901', group: 'Koptan Agro Makmur' },
-  { id: 'M-20119', name: 'Siti Aminah', phone: '0857-1234-5678', group: 'Koptan Tani Mandiri' },
-  { id: 'M-30064', name: 'Joko Susilo', phone: '0878-5555-4321', group: 'Koptan Subur Jaya' },
-  { id: 'M-30112', name: 'I Made Suarta', phone: '0819-2233-4455', group: 'Koptan Tani Mandiri' },
-  { id: 'M-40089', name: 'Hasan Basri', phone: '0811-3344-5566', group: 'Koptan Agro Makmur' }
-]
+const MOCK_MEMBERS = []
 
 const MOCK_LOAN_CONTRACTS = {
   'M-10023': [
@@ -356,7 +348,33 @@ function CommoditySmartCombobox({ value, onChange, commodities, error }) {
 
 
 function DataEntry() {
-  
+
+  const [members, setMembers] = useState([])
+  const [membersLoading, setMembersLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchMembers() {
+      try {
+        const data = await getMembers()
+        if (!cancelled) {
+          setMembers(data.map(m => ({
+            id: m.id,
+            name: m.name,
+            phone: m.phone || '',
+            group: m.commodity || ''
+          })))
+        }
+      } catch {
+        if (!cancelled) setMembers([])
+      } finally {
+        if (!cancelled) setMembersLoading(false)
+      }
+    }
+    fetchMembers()
+    return () => { cancelled = true }
+  }, [])
+
   const [activeTab, setActiveTab] = useState('inventory')
 
   
@@ -1003,7 +1021,7 @@ function DataEntry() {
                           setSelectedLoan('')
                           setLoanError('')
                         }}
-                        members={MOCK_MEMBERS}
+                        members={members}
                         error={!!memberError}
                       />
                       {memberError && (
