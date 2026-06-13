@@ -1,19 +1,19 @@
-import os
 from pathlib import Path
-from dotenv import load_dotenv
+from datetime import timedelta
+
+import dj_database_url
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / "server" / ".env")
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / "server" / ".env")
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-ijre*cp@c97i7zsmo0mc29i8+=-sx)t*z4s$gl!*d6he8i!+jg",
-)
+SECRET_KEY = env("SECRET_KEY")
+DEBUG = env.bool("DEBUG", default=False)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1")
-
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "cloudinary_storage",
     "cloudinary",
+    "drf_spectacular",
     "tenants",
     "accounts",
     "loans",
@@ -33,13 +34,13 @@ INSTALLED_APPS = [
     "simulation",
     "analytics",
     "advisory",
-    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -70,14 +71,20 @@ WSGI_APPLICATION = "server.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "agricredittwin"),
-        "USER": os.environ.get("DB_USER", "postgres"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env("PGDATABASE", default="agricredit"),
+        "USER": env("PGUSER", default="postgres"),
+        "PASSWORD": env("PGPASSWORD", default="postgres"),
+        "HOST": env("PGHOST", default="localhost"),
+        "PORT": env("PGPORT", default="5432"),
     }
 }
+
+DATABASE_URL = env("DATABASE_URL", default=None)
+if DATABASE_URL:
+    DATABASES["default"] = dj_database_url.parse(
+        DATABASE_URL, conn_max_age=600, ssl_require=not DEBUG
+    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -91,22 +98,36 @@ TIME_ZONE = "Asia/Jakarta"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
-MEDIA_URL = "media/"
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME", ""),
-    "API_KEY": os.environ.get("CLOUDINARY_API_KEY", ""),
-    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET", ""),
+    "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME", default=""),
+    "API_KEY": env("CLOUDINARY_API_KEY", default=""),
+    "API_SECRET": env("CLOUDINARY_API_SECRET", default=""),
 }
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:5173"]
+)
+CORS_ALLOW_CREDENTIALS = True
+
 REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.MultiPartParser",
+    ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -115,6 +136,11 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 50,
 }
+
+if DEBUG:
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
+        "rest_framework.renderers.BrowsableAPIRenderer"
+    )
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Agri-Credit Twin API",
@@ -125,14 +151,57 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
 }
 
-from datetime import timedelta
-
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "AUTH_HEADER_TYPES": ("Bearer",),
     "TOKEN_OBTAIN_SERIALIZER": "accounts.jwt.CustomTokenObtainPairSerializer",
 }
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+GROQ_API_KEY = env("GROQ_API_KEY", default="")
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "advisory": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
+        },
+        "simulation": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
+        },
+        "loans": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
+        },
+    },
+}
