@@ -1,22 +1,34 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, ArrowRight } from 'lucide-react';
 import AuthLogo from '@/components/auth/AuthLogo';
 import PasswordInput from '@/components/auth/PasswordInput';
+import { authService } from '@/services/authService';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const isValid = email.trim().length > 0 && password.length > 0;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) return;
     setSubmitting(true);
-    setTimeout(() => setSubmitting(false), 2000);
+    setError('');
+    try {
+      await authService.login(email, password);
+      navigate('/dashboard');
+    } catch (err) {
+      const msg = err.response?.data?.detail || err.response?.data?.error || 'Login gagal. Periksa email dan password Anda.';
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -107,6 +119,12 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5" style={{ animation: 'auth-fade-up 0.4s ease-out 0.1s both' }}>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                {error}
+              </div>
+            )}
             
             <div className="space-y-1.5">
               <label htmlFor="login-email" className="block text-sm font-medium text-foreground/80">
