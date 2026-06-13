@@ -36,27 +36,6 @@ function App() {
             <Route path="/auth/activate/:uidb64/:token" element={<ActivateAccount />} />
           </Route>
 
-<<<<<<< HEAD
-        
-        <Route path="/*" element={
-          <>
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/investor" element={<InvestorHome />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/simulation" element={<Simulation />} />
-              <Route path="/data-entry" element={<DataEntry />} />
-              <Route path="/risk" element={<RiskDashboard />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/invite-operator" element={<InviteOperator />} />
-            </Routes>
-          </>
-        } />
-      </Routes>
-    </div>
-=======
           {/* External auth routes */}
           <Route path="/auth/external/register" element={<ExternalRegister />} />
           <Route path="/auth/external/login" element={<ExternalLogin />} />
@@ -117,13 +96,19 @@ function App() {
                     <Transactions />
                   </ProtectedRoute>
                 } />
+
+                {/* Invite Operator — requires cooperative or admin role */}
+                <Route path="/invite-operator" element={
+                  <ProtectedRoute roles={['cooperative', 'admin']}>
+                    <InviteOperator />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </>
           } />
         </Routes>
       </div>
     </AuthProvider>
->>>>>>> 7a8c2aea2c31944ec7762e961c7b9a4fd7cebb66
   )
 }
 

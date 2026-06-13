@@ -6,30 +6,21 @@ import {
   LayoutDashboard,
   SearchAlert,
   TriangleAlert,
-<<<<<<< HEAD
   UserPlus,
-=======
   LogOut,
   User,
->>>>>>> 7a8c2aea2c31944ec7762e961c7b9a4fd7cebb66
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileNavbar from "./MobileNavbar";
 import { useAuth } from "@/contexts/AuthContext";
 
 function Navbar() {
-<<<<<<< HEAD
-  const user = true;
-  const role = "cooperative";
-  const isAdmin = true
-  
-=======
   const { user, isAuthenticated, logout } = useAuth();
->>>>>>> 7a8c2aea2c31944ec7762e961c7b9a4fd7cebb66
   const location = useLocation();
   const navigate = useNavigate();
 
   const role = user?.role || null;
+  const isAdmin = role === "admin" || role === "cooperative";
 
   const handleLogout = () => {
     logout();
@@ -54,14 +45,7 @@ function Navbar() {
           <div className="hidden md:flex items-center space-x-4 items-center">
             {isAuthenticated ? (
               <>
-<<<<<<< HEAD
                 <NavLinks role={role} currentPath={location.pathname} isAdmin={isAdmin}/>
-                <span className="text-sm text-muted-foreground">
-                  {user.username}
-                </span>
-                <Button className="cursor-pointer px-4 hover:opacity-90 bg-[#7FFF00]">
-=======
-                <NavLinks role={role} currentPath={location.pathname} />
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
                     <User className="w-3 h-3" />
@@ -78,7 +62,6 @@ function Navbar() {
                   onClick={handleLogout}
                 >
                   <LogOut className="w-4 h-4 mr-1.5" />
->>>>>>> 7a8c2aea2c31944ec7762e961c7b9a4fd7cebb66
                   Logout
                 </Button>
               </>
@@ -123,16 +106,13 @@ function Navbar() {
               </>
             )}
           </div>
-<<<<<<< HEAD
-          <MobileNavbar user={user} role={role} isAdmin={isAdmin} />
-=======
           <MobileNavbar
             user={isAuthenticated ? user : null}
             role={role}
             isAuthenticated={isAuthenticated}
             onLogout={handleLogout}
+            isAdmin={isAdmin}
           />
->>>>>>> 7a8c2aea2c31944ec7762e961c7b9a4fd7cebb66
         </div>
       </div>
     </nav>
@@ -179,17 +159,13 @@ const NavLinks = ({ role, currentPath,isAdmin }) => {
           <span className="hidden lg:inline">Analytics</span>
         </Link>
       )}
-<<<<<<< HEAD
-      {(role == "cooperative" && isAdmin) && (
+      {((role === "cooperative" || role === "admin") && isAdmin) && (
         <Link to="/invite-operator" className={navLinkClass('/invite-operator', currentPath)}>
           <UserPlus className="w-4 h-4" />
           <span className="hidden lg:inline">Kelola Tim</span>
         </Link>
       )}
-      {role == "auditor" && (
-=======
       {role === "auditor" && (
->>>>>>> 7a8c2aea2c31944ec7762e961c7b9a4fd7cebb66
         <Link to="/transactions" className={navLinkClass('/transactions', currentPath)}>
           <SearchAlert className="w-4 h-4" />
           <span className="hidden lg:inline">Transactions</span>
