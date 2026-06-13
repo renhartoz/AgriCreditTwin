@@ -17,9 +17,9 @@ function CTA({ mode }) {
   ]
 
   const cooperativeBullets = [
-    "Skor Risiko Petani instan berdasarkan pencatatan data budidaya riil di lapangan",
+    "Analisis kelayakan kredit instan berbasis skenario pasar dan proyeksi panen petani",
     "Teknologi simulasi digital canggih untuk mendeteksi anomali kredit dan mencegah gagal bayar",
-    "Perlindungan privasi data anggota tanpa adanya kebocoran informasi pribadi yang sensitif"
+    "Transparansi data institusional melalui gerbang RBAC yang menjaga privasi petani sepenuhnya"
   ]
 
   const bullets = isInvestor ? investorBullets : cooperativeBullets

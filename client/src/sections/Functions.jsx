@@ -1,53 +1,53 @@
-import { LineChart, Shield, Sprout, Layers, Coins, Calendar, Database, Eye } from 'lucide-react'
+import { LineChart, Shield, Sprout, Layers, Coins, Calendar, Database, Eye, Book } from 'lucide-react'
 
 function Functions({ mode }) {
   const isInvestor = mode === 'investor'
   
-  const investorFeatures = [
+ const investorFeatures = [
     {
       icon: <LineChart className="w-8 h-8 text-[#1ecfc1]" />,
-      title: "Simulasi Risiko Stokastik",
-      description: "Uji ketahanan portofolio terhadap hasil panen, perubahan harga pasar, dan cuaca ekstrem menggunakan skenario simulasi otomatis untuk menghasilkan skor risiko kredit yang akurat."
+      title: "Proyeksi Likuiditas & Arus Kas",
+      description: "Akses matriks prediksi arus kas masuk kolektif yang disandingkan dengan musim panen untuk melihat ketahanan likuiditas pada bulan-bulan kritis secara transparan."
     },
     {
       icon: <Shield className="w-8 h-8 text-[#1ecfc1]" />,
-      title: "Audit Kesehatan Koperasi",
-      description: "Akses riwayat penyaluran kredit koperasi, rasio kredit bermasalah (NPL) historis, kecukupan cadangan likuiditas, dan indikator tata kelola keuangan secara aman."
+      title: "Akses Portofolio Tersanitasi",
+      description: "Akselerasi uji tuntas (due diligence) hingga 50% lebih cepat melalui gerbang Role-Based Access Control (RBAC) yang menyajikan metrik agregat portofolio tanpa membocorkan privasi personal petani."
     },
     {
       icon: <Sprout className="w-8 h-8 text-[#1ecfc1]" />,
-      title: "Pemantauan Lahan via Satelit",
-      description: "Pantau indeks kesehatan vegetasi (NDVI) tanaman, tingkat kelembapan tanah, dan histori produktivitas lahan petani secara langsung melalui data penginderaan jauh."
+      title: "Analitik Valuasi Aset Fisik",
+      description: "Pantau total valuasi aset gudang secara real-time dari seluruh komoditas logistik hasil bumi yang bertindak sebagai jaminan likuiditas fisik koperasi."
     },
     {
       icon: <Layers className="w-8 h-8 text-[#1ecfc1]" />,
-      title: "Manajemen Risiko Portofolio",
-      description: "Diversifikasikan alokasi modal investasi Anda berdasarkan tingkat kelayakan kredit, mikroklimat wilayah, siklus panen, dan jenis komoditas pertanian."
+      title: "Eksplorasi Multi-Koperasi",
+      description: "Bermanuver dan bandingkan performa risiko dari berbagai entitas koperasi desa dalam satu jaringan ekosistem untuk diversifikasi alokasi pendanaan institusional yang lebih terukur."
     }
-  ]
+  ];
 
   const cooperativeFeatures = [
     {
       icon: <Coins className="w-8 h-8 text-primary-foreground" />,
-      title: "Proyeksi Arus Kas Petani",
-      description: "Simulasikan dan proyeksikan koridor arus kas bulanan setiap petani untuk mengukur rasio kemampuan membayar cicilan (DSCR) secara akurat sebelum kredit disetujui."
+      title: "Simulasi Kelayakan Kredit Proaktif",
+      description: "Tinggalkan penilaian spekulatif. Sistem mengeksekusi komputasi algoritma stokastik untuk memproyeksikan arus kas petani di masa depan berdasarkan luas lahan, harga gabah, dan siklus musim tanam sebelum pinjaman disetujui."
     },
     {
       icon: <Calendar className="w-8 h-8 text-primary-foreground" />,
-      title: "Penyelarasan Siklus Panen",
-      description: "Sesuaikan jadwal pembayaran cicilan dan tenor kredit secara dinamis mengikuti kalender tanam, pemeliharaan, dan masa panen guna mencegah kemacetan kas musiman."
+      title: "Deteksi Defisit & Restrukturisasi",
+      description: "Lindungi likuiditas koperasi dari skema tagihan bulanan yang kaku. Jika algoritma memprediksi defisit arus kas pada bulan non-panen, sistem otomatis memberikan peringatan NPL dan merekomendasikan penyesuaian tenor."
     },
     {
-      icon: <Eye className="w-8 h-8 text-primary-foreground" />,
-      title: "Audit Batas Lahan Satelit",
-      description: "Verifikasi batas lahan garapan petani, riwayat kesuburan tanah, serta kepastian luas area budidaya secara jarak jauh dengan citra satelit GIS terintegrasi."
+      icon: <Book className="w-8 h-8 text-primary-foreground" />,
+      title: "Validasi Pembukuan Terstruktur",
+      description: "Selamat tinggal pembukuan manual Excel yang rentan hilang. Antarmuka entri data relasional kami memiliki validasi parameter ketat untuk setiap transaksi finansial dan logistik, memastikan integritas data mencapai 100%."
     },
     {
       icon: <Database className="w-8 h-8 text-primary-foreground" />,
-      title: "Kubah Dokumen Terenkripsi",
-      description: "Kumpulkan identitas pemohon dan sertifikat lahan dalam media penyimpanan yang aman dan terenkripsi, mematuhi regulasi perlindungan privasi data sepenuhnya."
+      title: "Arsitektur Multi-Tenant Terisolasi",
+      description: "Kelola berbagai cabang koperasi desa dalam satu peladen tanpa tumpang tindih. Melalui partisi skema basis data independen, pengurus hanya dapat memproses dan melihat laporan dari koperasi mereka sendiri dengan aman."
     }
-  ]
+  ];
 
   const features = isInvestor ? investorFeatures : cooperativeFeatures
   const accentBg = isInvestor ? 'bg-[#1ecfc1]/10' : 'bg-primary/10'
