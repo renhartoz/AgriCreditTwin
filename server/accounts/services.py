@@ -174,6 +174,7 @@ def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, e
             logger.exception("Failed to upload verification document to Cloudinary")
             raise ValueError("Failed to upload verification document. Please try again.")
 
+    from django.conf import settings
     tenant = Tenant.objects.create(
         name=coop_name,
         schema_name=schema_name,
@@ -181,7 +182,7 @@ def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, e
         sk_badan_hukum=sk_badan_hukum,
         nib=nib,
         verification_document=doc_path,
-        is_verified=False,
+        is_verified=settings.DEBUG,
     )
 
     user = User.objects.create_user(
