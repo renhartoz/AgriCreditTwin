@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,12 +12,19 @@ from .services import register_tenant, invite_operator
 
 class RegisterTenantView(APIView):
     permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
     serializer_class = TenantRegistrationSerializer
 
     @extend_schema(
         summary="Register New Cooperative (Tenant)",
-        description="Provisions an isolated PostgreSQL schema, creates the first admin user, and sets is_verified=False.",
-        request=TenantRegistrationSerializer,
+        description=(
+            "Provisions an isolated PostgreSQL schema, creates the first admin user, "
+            "and uploads the verification document (PDF). Sets is_verified=False pending SuperAdmin review. "
+            "This endpoint consumes multipart/form-data for the file upload."
+        ),
+        request={
+            "multipart/form-data": TenantRegistrationSerializer,
+        },
         responses={
             201: OpenApiResponse(description="Tenant registered successfully."),
             400: OpenApiResponse(description="Cooperative name already registered."),
@@ -34,6 +42,8 @@ class RegisterTenantView(APIView):
                 coop_name=data["coop_name"],
                 nomor_induk_koperasi=data["nomor_induk_koperasi"],
                 sk_badan_hukum=data["sk_badan_hukum"],
+                nib=data.get("nib", ""),
+                verification_document=data["verification_document"],
                 username=data["username"],
                 email=data["email"],
                 password=data["password"],

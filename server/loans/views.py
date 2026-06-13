@@ -1,7 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from accounts.permissions import IsOperatorOrAdmin, IsAuditor
 from .models import Member, Loan, LoanAuditHistory
 from .serializers import (
@@ -22,10 +23,10 @@ class LoanApplyView(APIView):
     @extend_schema(
         summary="Submit Loan Application",
         description=(
-            "Validates the declared yield against regional benchmarks (AVS), "
-            "then runs a 1,000-iteration Monte Carlo cash flow simulation to "
-            "determine loan approval or restructuring. Returns the full simulation "
-            "metrics and repayment recommendation."
+            "Validates the declared yield against regional benchmarks (AVS) using the submitted "
+            "land_area_ha, then runs a 1,000-iteration Monte Carlo cash flow simulation to "
+            "determine loan approval or restructuring. The estimated_grain_price overrides "
+            "the static commodity price in the simulation engine."
         ),
         request=LoanApplicationSerializer,
         responses={
@@ -68,10 +69,12 @@ class LoanApplyView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        land_area = data["land_area_ha"]
+
         avs_result = validate_avs(
             commodity=data["commodity"],
             declared_yield_tons=data["declared_yield_tons"],
-            land_area_ha=member.land_area_ha,
+            land_area_ha=land_area,
         )
 
         if not avs_result["passed"]:
@@ -100,7 +103,7 @@ class LoanApplyView(APIView):
             )
 
         sim = run_monte_carlo_simulation(
-            land_area_ha=member.land_area_ha,
+            land_area_ha=land_area,
             commodity=data["commodity"],
             planting_month=data["planting_month"],
             harvest_month=data["harvest_month"],
@@ -143,7 +146,37 @@ class AuditLoansView(APIView):
 
     @extend_schema(
         summary="Query Loan Audit Trail",
-        description="Returns immutable audit log entries filtered by loan, officer, or date range.",
+        description="Returns immutable audit log entries filtered by loan, officer, or date range. Supports Condition E (immutable audit trail) of the case study.",
+        parameters=[
+            OpenApiParameter(
+                name="loan_id",
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                description="Filter by specific loan ID.",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="officer_id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description="Filter by the officer who made the change.",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="start_date",
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                description="Filter changes on or after this date (YYYY-MM-DD).",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="end_date",
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                description="Filter changes on or before this date (YYYY-MM-DD).",
+                required=False,
+            ),
+        ],
         responses={200: LoanAuditSerializer(many=True)},
         tags=["Audit"],
     )
@@ -165,13 +198,13 @@ class AuditLoansView(APIView):
         if officer_id:
             qs = qs.filter(officer_id=officer_id)
 
-        date_from = request.query_params.get("date_from")
-        if date_from:
-            qs = qs.filter(changed_at__gte=date_from)
+        start_date = request.query_params.get("start_date")
+        if start_date:
+            qs = qs.filter(changed_at__date__gte=start_date)
 
-        date_to = request.query_params.get("date_to")
-        if date_to:
-            qs = qs.filter(changed_at__lte=date_to)
+        end_date = request.query_params.get("end_date")
+        if end_date:
+            qs = qs.filter(changed_at__date__lte=end_date)
 
         serializer = self.serializer_class(qs[:200], many=True)
         return Response(serializer.data)
