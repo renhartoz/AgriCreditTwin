@@ -185,7 +185,7 @@ function StepAdminAccount({ data, setData }) {
           type="email"
           value={data.email}
           onChange={(e) => setData({ ...data, email: e.target.value })}
-          placeholder="admin@koperasi.co.id"
+          placeholder="admin@gmail.com"
           className={`w-full h-11 px-4 rounded-xl border bg-background text-sm
             transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50
