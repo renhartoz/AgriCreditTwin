@@ -6,6 +6,7 @@ import {
   HardDriveDownload,
   ChartNoAxesCombined,
   SearchAlert,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,11 +19,8 @@ import {
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-function MobileNavbar({ role = "auditor", user = true }) {
+function MobileNavbar({ role, user, isAuthenticated, onLogout }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const loading = false;
-
-  if (loading) return null;
 
   return (
     <div className="flex md:hidden items-center space-x-2">
@@ -37,9 +35,20 @@ function MobileNavbar({ role = "auditor", user = true }) {
             <SheetTitle>Menu</SheetTitle>
           </SheetHeader>
           <nav className="flex flex-col space-y-4 mt-6">
-            {user ? (
+            {isAuthenticated ? (
               <>
-                {role === "cooperative" && (
+                {user?.name && (
+                  <div className="px-2 py-3 border-b border-border mb-2">
+                    <p className="text-sm font-semibold text-foreground">{user.name}</p>
+                    {role && (
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        {role}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {(role === "cooperative" || role === "admin") && (
                   <Button
                     variant="ghost"
                     className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
@@ -51,8 +60,8 @@ function MobileNavbar({ role = "auditor", user = true }) {
                     </Link>
                   </Button>
                 )}
-                
-                {role === "cooperative" ? (
+
+                {role === "cooperative" || role === "admin" ? (
                   <Button
                     variant="ghost"
                     className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
@@ -76,7 +85,7 @@ function MobileNavbar({ role = "auditor", user = true }) {
                   </Button>
                 )}
 
-                {role === "cooperative" ? (
+                {role === "cooperative" || role === "admin" ? (
                   <Button
                     variant="ghost"
                     className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
@@ -114,7 +123,14 @@ function MobileNavbar({ role = "auditor", user = true }) {
                 )}
 
                 <div className="flex items-center justify-center pt-4">
-                  <Button className="min-w-[100px] cursor-pointer hover:opacity-90 bg-[#7FFF00] text-black font-semibold">
+                  <Button
+                    className="min-w-[100px] cursor-pointer hover:opacity-90 bg-[#7FFF00] text-black font-semibold"
+                    onClick={() => {
+                      setShowMobileMenu(false);
+                      onLogout();
+                    }}
+                  >
+                    <LogOut className="w-4 h-4 mr-1.5" />
                     Logout
                   </Button>
                 </div>
@@ -126,7 +142,7 @@ function MobileNavbar({ role = "auditor", user = true }) {
                   className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
                   asChild
                 >
-                  <Link to="/login" onClick={() => setShowMobileMenu(false)}>
+                  <Link to="/auth/login" onClick={() => setShowMobileMenu(false)}>
                     <LayoutDashboard className="w-4 h-4" />
                     Dashboard
                   </Link>
@@ -136,7 +152,7 @@ function MobileNavbar({ role = "auditor", user = true }) {
                   className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
                   asChild
                 >
-                  <Link to="/login" onClick={() => setShowMobileMenu(false)}>
+                  <Link to="/auth/login" onClick={() => setShowMobileMenu(false)}>
                     <FastForward className="w-4 h-4" />
                     Simulation
                   </Link>
@@ -146,14 +162,14 @@ function MobileNavbar({ role = "auditor", user = true }) {
                   className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
                   asChild
                 >
-                  <Link to="/login" onClick={() => setShowMobileMenu(false)}>
+                  <Link to="/auth/login" onClick={() => setShowMobileMenu(false)}>
                     <HardDriveDownload className="w-4 h-4" />
                     Data Entry
                   </Link>
                 </Button>
                 <div className="flex items-center justify-center pt-4">
                   <Button className="min-w-[100px] cursor-pointer hover:opacity-90 bg-[#7FFF00] text-black font-semibold" asChild>
-                    <Link to="/login" onClick={() => setShowMobileMenu(false)}>
+                    <Link to="/auth/login" onClick={() => setShowMobileMenu(false)}>
                       Login
                     </Link>
                   </Button>

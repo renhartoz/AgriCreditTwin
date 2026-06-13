@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Building2, UserPlus, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { authService } from '@/services/authService';
 import AuthLogo from '@/components/auth/AuthLogo';
 import StepIndicator from '@/components/auth/StepIndicator';
 import PasswordInput from '@/components/auth/PasswordInput';
@@ -10,7 +11,7 @@ const STEPS = ['Identitas Koperasi', 'Akun Admin'];
 
 
 function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@x`]+\.[^\s@]+$/.test(email);
 }
 
 function validateNIK(nik) {
@@ -158,27 +159,9 @@ function StepAdminAccount({ data, setData }) {
         </div>
       </div>
 
-      
-      <div className="space-y-1.5">
-        <label htmlFor="admin-name" className="block text-sm font-medium text-foreground/80">
-          Nama Lengkap Admin <span className="text-red-400">*</span>
-        </label>
-        <input
-          id="admin-name"
-          type="text"
-          value={data.adminName}
-          onChange={(e) => setData({ ...data, adminName: e.target.value })}
-          placeholder="Nama lengkap sesuai KTP"
-          className="w-full h-11 px-4 rounded-xl border border-border bg-background text-sm
-            transition-all duration-200 hover:border-foreground/20
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
-        />
-      </div>
-
-      
       <div className="space-y-1.5">
         <label htmlFor="admin-email" className="block text-sm font-medium text-foreground/80">
-          Email Resmi <span className="text-red-400">*</span>
+          Email Admin <span className="text-xs text-muted-foreground">(digunakan untuk login)</span> <span className="text-red-400">*</span>
         </label>
         <input
           id="admin-email"
@@ -226,6 +209,7 @@ export default function RegisterCooperative() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [data, setData] = useState({
     name: '',
@@ -233,7 +217,6 @@ export default function RegisterCooperative() {
     nib: '',
     skNumber: '',
     certificate: null,
-    adminName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -251,20 +234,40 @@ export default function RegisterCooperative() {
 
   const step2Valid = useMemo(
     () =>
-      data.adminName.trim().length > 0 &&
       validateEmail(data.email) &&
       data.password.length >= 8 &&
       data.password === data.confirmPassword,
-    [data.adminName, data.email, data.password, data.confirmPassword]
+    [data.email, data.password, data.confirmPassword]
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!step2Valid) return;
     setSubmitting(true);
-    setTimeout(() => {
+    setSubmitError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('coop_name', data.name);
+      formData.append('nomor_induk_koperasi', data.nik);
+      formData.append('sk_badan_hukum', data.skNumber);
+      formData.append('nib', data.nib);
+      formData.append('verification_document', data.certificate);
+      formData.append('username', data.email.split('@')[0]);
+      formData.append('email', data.email);
+      formData.append('password', data.password);
+
+      console.log('[Register] Submitting registration...');
+      const result = await authService.registerTenant(formData);
+      console.log('[Register] Success:', result);
       navigate('/auth/register-success');
-    }, 1500);
+    } catch (err) {
+      console.error('[Register] Error:', err.response?.data || err.message);
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      setSubmitError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -297,6 +300,12 @@ export default function RegisterCooperative() {
           <form onSubmit={handleSubmit}>
             {step === 0 && <StepCooperativeIdentity data={data} setData={setData} />}
             {step === 1 && <StepAdminAccount data={data} setData={setData} />}
+
+            {submitError && (
+              <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600">
+                {submitError}
+              </div>
+            )}
 
             
             <div className="flex items-center gap-3 mt-8">

@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Loader2, ArrowRight } from 'lucide-react';
 import AuthLogo from '@/components/auth/AuthLogo';
 import PasswordInput from '@/components/auth/PasswordInput';
-import { authService } from '@/services/authService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -21,10 +23,22 @@ export default function Login() {
     setSubmitting(true);
     setError('');
     try {
-      await authService.login(email, password);
-      navigate('/dashboard');
+      const result = await login(email, password);
+      const role = result?.user?.role;
+      const from = location.state?.from?.pathname;
+      if (from) {
+        navigate(from, { replace: true });
+      } else if (role === 'investor' || role === 'auditor') {
+        navigate('/investor');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
-      const msg = err.response?.data?.detail || err.response?.data?.error || 'Login gagal. Periksa email dan password Anda.';
+      const resData = err.response?.data;
+      const msg = resData?.non_field_errors?.[0]
+        || resData?.detail
+        || resData?.error
+        || 'Login gagal. Periksa email dan password Anda.';
       setError(msg);
     } finally {
       setSubmitting(false);

@@ -79,6 +79,7 @@ api.interceptors.response.use(
       processQueue(refreshError);
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REFRESH_KEY);
+      localStorage.removeItem('auth_user');
       window.location.href = '/auth/login';
       return Promise.reject(refreshError);
     } finally {

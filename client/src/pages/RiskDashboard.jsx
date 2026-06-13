@@ -39,6 +39,7 @@ import {
   PolarRadiusAxis,
   Radar
 } from 'recharts'
+import { getPortfolio } from '../services/analyticsService.js'
 
 
 const COOPERATIVES_LIST = [
@@ -343,8 +344,41 @@ function RiskDashboard() {
   const [selectedCooperative, setSelectedCooperative] = useState(COOPERATIVES_LIST[0])
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [portfolioData, setPortfolioData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
   const inputRef = useRef(null)
   const wrapperRef = useRef(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchPortfolio() {
+      try {
+        setLoading(true)
+        const data = await getPortfolio()
+        if (cancelled) return
+        setPortfolioData(data)
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to fetch portfolio:', err)
+          setFetchError('Gagal memuat data portofolio. Menggunakan data sementara.')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    fetchPortfolio()
+    return () => { cancelled = true }
+  }, [])
+
+  const enrichedCooperative = useMemo(() => {
+    if (!portfolioData) return selectedCooperative
+    return {
+      ...selectedCooperative,
+      npl: portfolioData.npl_rate != null ? (portfolioData.npl_rate * 100) : selectedCooperative.npl,
+      totalLoans: portfolioData.total_disbursed ? parseFloat(portfolioData.total_disbursed) : selectedCooperative.totalLoans,
+    }
+  }, [selectedCooperative, portfolioData])
 
   
   useEffect(() => {
@@ -381,11 +415,24 @@ function RiskDashboard() {
     inputRef.current?.focus()
   }
 
-  const risk = getRiskConfig(selectedCooperative.riskLevel)
+  const risk = getRiskConfig(enrichedCooperative.riskLevel)
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 text-slate-800 dark:text-slate-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
+
+        {loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-400 text-xs font-semibold">
+            <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+            Memuat data portofolio dari server...
+          </div>
+        )}
+        {fetchError && !loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+            <AlertCircle className="w-4 h-4" />
+            {fetchError}
+          </div>
+        )}
 
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
@@ -535,7 +582,7 @@ function RiskDashboard() {
                       {selectedCooperative.name}
                     </p>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                      PD: {selectedCooperative.pd}% • {risk.label}
+                      PD: {enrichedCooperative.pd}% • {risk.label}
                     </p>
                   </div>
                 </div>
@@ -555,10 +602,10 @@ function RiskDashboard() {
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Probabilitas Gagal Bayar
               </span>
-              <TrendingDown className={`w-4 h-4 ${selectedCooperative.pd < 5 ? 'text-emerald-500' : selectedCooperative.pd < 15 ? 'text-amber-500' : 'text-rose-500'}`} />
+              <TrendingDown className={`w-4 h-4 ${enrichedCooperative.pd < 5 ? 'text-emerald-500' : enrichedCooperative.pd < 15 ? 'text-amber-500' : 'text-rose-500'}`} />
             </div>
             <p className={`text-2xl font-extrabold ${risk.color}`}>
-              {selectedCooperative.pd}%
+              {enrichedCooperative.pd}%
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Simulasi Monte Carlo 250 siklus</p>
           </div>
@@ -569,12 +616,12 @@ function RiskDashboard() {
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Rasio Pinjaman (LDR)
               </span>
-              <Activity className={`w-4 h-4 ${selectedCooperative.ldr < 80 ? 'text-emerald-500' : selectedCooperative.ldr < 90 ? 'text-amber-500' : 'text-rose-500'}`} />
+              <Activity className={`w-4 h-4 ${enrichedCooperative.ldr < 80 ? 'text-emerald-500' : enrichedCooperative.ldr < 90 ? 'text-amber-500' : 'text-rose-500'}`} />
             </div>
             <p className={`text-2xl font-extrabold ${
-              selectedCooperative.ldr < 80 ? 'text-emerald-600 dark:text-emerald-400' : selectedCooperative.ldr < 90 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'
+              enrichedCooperative.ldr < 80 ? 'text-emerald-600 dark:text-emerald-400' : enrichedCooperative.ldr < 90 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'
             }`}>
-              {selectedCooperative.ldr}%
+              {enrichedCooperative.ldr}%
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Loan-to-Deposit Ratio</p>
           </div>
@@ -585,12 +632,12 @@ function RiskDashboard() {
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Kredit Bermasalah (NPL)
               </span>
-              <TriangleAlert className={`w-4 h-4 ${selectedCooperative.npl < 3 ? 'text-emerald-500' : selectedCooperative.npl < 7 ? 'text-amber-500' : 'text-rose-500'}`} />
+              <TriangleAlert className={`w-4 h-4 ${enrichedCooperative.npl < 3 ? 'text-emerald-500' : enrichedCooperative.npl < 7 ? 'text-amber-500' : 'text-rose-500'}`} />
             </div>
             <p className={`text-2xl font-extrabold ${
-              selectedCooperative.npl < 3 ? 'text-emerald-600 dark:text-emerald-400' : selectedCooperative.npl < 7 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'
+              enrichedCooperative.npl < 3 ? 'text-emerald-600 dark:text-emerald-400' : enrichedCooperative.npl < 7 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'
             }`}>
-              {selectedCooperative.npl}%
+              {enrichedCooperative.npl}%
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Non-Performing Loan Ratio</p>
           </div>
@@ -604,9 +651,9 @@ function RiskDashboard() {
               <Landmark className="w-4 h-4 text-slate-400" />
             </div>
             <p className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">
-              Rp {formatBillions(selectedCooperative.totalLoans)}
+              Rp {formatBillions(enrichedCooperative.totalLoans)}
             </p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{selectedCooperative.members} anggota aktif</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{enrichedCooperative.members} anggota aktif</p>
           </div>
         </div>
 

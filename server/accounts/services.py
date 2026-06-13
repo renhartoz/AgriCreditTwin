@@ -12,6 +12,7 @@ from django.utils.http import urlsafe_base64_encode
 from tenants.models import Tenant
 from tenants.tenant import sanitize_schema_name, provision_tenant_schema
 from .models import UserProfile
+from .cloudinary_service import upload_file, CloudinaryServiceError
 
 logger = logging.getLogger("accounts")
 
@@ -22,7 +23,7 @@ def generate_password(length=10):
 
 
 def send_operator_invitation(email, username, password):
-    login_url = f"{settings.FRONTEND_URL}/login"
+    login_url = f"{settings.FRONTEND_URL}/auth/login"
     html_body = f"""\
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
         <h2 style="color:#16a34a;">Agri-Credit Twin</h2>
@@ -50,7 +51,7 @@ def send_operator_invitation(email, username, password):
 def send_activation_email(user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-    activation_link = f"{settings.FRONTEND_URL}/activate/{uid}/{token}/"
+    activation_link = f"{settings.FRONTEND_URL}/auth/activate/{uid}/{token}/"
 
     html_body = f"""\
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
@@ -67,6 +68,37 @@ def send_activation_email(user):
         body=f"Activate your account: {activation_link}",
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[user.email],
+    )
+    msg.attach_alternative(html_body, "text/html")
+    msg.send()
+
+
+def send_cooperative_registration_email(coop_name, admin_email, admin_username):
+    html_body = f"""\
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+        <h2 style="color:#16a34a;">Agri-Credit Twin</h2>
+        <h3 style="color:#333;">Pendaftaran Koperasi Berhasil</h3>
+        <p>Terima kasih telah mendaftarkan <strong>{coop_name}</strong> di Agri-Credit Twin.</p>
+        <table style="border-collapse:collapse;width:100%;margin:16px 0;">
+            <tr><td style="padding:6px 0;color:#555;">Nama Koperasi</td><td><strong>{coop_name}</strong></td></tr>
+            <tr><td style="padding:6px 0;color:#555;">Username Admin</td><td><strong>{admin_username}</strong></td></tr>
+            <tr><td style="padding:6px 0;color:#555;">Email Admin</td><td><strong>{admin_email}</strong></td></tr>
+        </table>
+        <div style="padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;margin:16px 0;">
+            <p style="margin:0;font-size:14px;color:#92400e;">
+                <strong>Status: Menunggu Verifikasi</strong><br>
+                Akun koperasi Anda sedang dalam proses verifikasi oleh SuperAdmin. Kami akan mengirimkan email konfirmasi setelah verifikasi selesai dalam 1×24 jam.
+            </p>
+        </div>
+        <p style="font-size:13px;color:#888;">Jika Anda tidak merasa mendaftarkan koperasi ini, abaikan email ini.</p>
+    </div>
+    """
+
+    msg = EmailMultiAlternatives(
+        subject=f"Pendaftaran {coop_name} - Menunggu Verifikasi | Agri-Credit Twin",
+        body=f"Pendaftaran {coop_name} berhasil. Status: Menunggu Verifikasi oleh SuperAdmin.",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[admin_email],
     )
     msg.attach_alternative(html_body, "text/html")
     msg.send()
@@ -120,20 +152,42 @@ def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, e
             suffix += 1
         schema_name = f"{schema_name}_{suffix}"
 
+    doc_path = ""
+    if verification_document:
+        try:
+            full_url = upload_file(
+                verification_document,
+                folder="coop_certificates",
+                resource_type="raw",
+            )
+            parts = full_url.split("/upload/")
+            if len(parts) == 2:
+                path_after_version = parts[1]
+                segments = path_after_version.split("/")
+                if segments and segments[0].startswith("v") and segments[0][1:].isdigit():
+                    doc_path = "/".join(segments[1:])
+                else:
+                    doc_path = path_after_version
+            else:
+                doc_path = full_url
+        except CloudinaryServiceError:
+            logger.exception("Failed to upload verification document to Cloudinary")
+            raise ValueError("Failed to upload verification document. Please try again.")
+
     tenant = Tenant.objects.create(
         name=coop_name,
         schema_name=schema_name,
         nomor_induk_koperasi=nomor_induk_koperasi,
         sk_badan_hukum=sk_badan_hukum,
         nib=nib,
-        verification_document=verification_document,
+        verification_document=doc_path,
         is_verified=False,
     )
 
     user = User.objects.create_user(
         username=username,
         email=email,
-        password=password,
+        password=password
     )
 
     UserProfile.objects.create(
@@ -143,6 +197,11 @@ def register_tenant(coop_name, nomor_induk_koperasi, sk_badan_hukum, username, e
     )
 
     provision_tenant_schema(tenant)
+
+    try:
+        send_cooperative_registration_email(coop_name, email, username)
+    except Exception:
+        logger.exception("Failed to send registration email to %s", email)
 
     return tenant, user
 

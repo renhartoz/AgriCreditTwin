@@ -20,6 +20,7 @@ import {
   Plus,
   Scale
 } from 'lucide-react'
+import { applyLoan } from '../services/loanService.js'
 
 
 const MOCK_MEMBERS = [
@@ -501,7 +502,7 @@ function DataEntry() {
     }
   }
 
-  const handleSaveTransaction = () => {
+  const handleSaveTransaction = async () => {
     setMemberError('')
     setTypeError('')
     setLoanError('')
@@ -534,8 +535,58 @@ function DataEntry() {
 
     setIsSaving(true)
 
+    const cleanAmount = parseInt(rawAmount.replace(/\D/g, ''), 10)
+
+    if (transactionType === 'loan_disbursement' && selectedMember) {
+      try {
+        const loanPayload = {
+          member_id: selectedMember.id,
+          amount: cleanAmount,
+          tenor_months: 12,
+          declared_yield_tons: 5.0,
+          commodity: 'rice',
+          land_area_ha: 1.0,
+          estimated_grain_price: 6500,
+          planting_month: new Date().getMonth() + 1,
+          harvest_month: ((new Date().getMonth() + 4) % 12) + 1,
+          monthly_living_cost: 2000000,
+          monthly_farming_cost: 500000
+        }
+        const result = await applyLoan(loanPayload)
+
+        const newTransaction = {
+          id: result.loan_id || Date.now(),
+          member: { id: selectedMember.id, name: selectedMember.name },
+          type: transactionType,
+          amount: cleanAmount,
+          loanId: result.loan_id || null,
+          date: transactionDate,
+          description: `Status: ${result.status} | AVS: ${result.avs?.passed ? 'Lolos' : 'Gagal'}`
+        }
+
+        setRecentTransactions((prev) => [newTransaction, ...prev].slice(0, 8))
+        setSelectedMember(null)
+        setTransactionType('')
+        setSelectedLoan('')
+        setRawAmount('')
+        setDescription('')
+        setTransactionDate(todayISO())
+
+        setIsSaving(false)
+        setToastMessage(`Pinjaman ${result.status === 'approved' ? 'disetujui' : 'diproses'}! ID: ${result.loan_id}`)
+        setSavedToast(true)
+        setTimeout(() => setSavedToast(false), 4000)
+        return
+      } catch (err) {
+        console.error('Loan application failed:', err)
+        setIsSaving(false)
+        setToastMessage('Gagal mengirim ke server. Data disimpan secara lokal.')
+        setSavedToast(true)
+        setTimeout(() => setSavedToast(false), 3000)
+      }
+    }
+
     setTimeout(() => {
-      const cleanAmount = parseInt(rawAmount.replace(/\D/g, ''), 10)
       const newTransaction = {
         id: Date.now(),
         member: { id: selectedMember.id, name: selectedMember.name },

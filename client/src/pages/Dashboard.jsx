@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   TriangleAlert,
@@ -28,16 +28,50 @@ import {
   LineChart,
   BarChart
 } from 'recharts'
+import { getPortfolio } from '../services/analyticsService.js'
 
 function Dashboard() {
-  const tenantName = 'Koperasi Padiwangi Utama'
   const [isVerified, setIsVerified] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [portfolioError, setPortfolioError] = useState(null)
 
-  const activeMembersCount = 1248
-  const totalDefaultedAmount = 124500000
-  const totalDefaultedCount = 12
-  const totalOutstandingLoans = 1842500000
-  const totalSavings = 420700000
+  const [tenantName, setTenantName] = useState('Koperasi Padiwangi Utama')
+  const [activeMembersCount, setActiveMembersCount] = useState(1248)
+  const [totalDefaultedAmount, setTotalDefaultedAmount] = useState(124500000)
+  const [totalDefaultedCount, setTotalDefaultedCount] = useState(12)
+  const [totalOutstandingLoans, setTotalOutstandingLoans] = useState(1842500000)
+  const [totalSavings, setTotalSavings] = useState(420700000)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchPortfolio() {
+      try {
+        setLoading(true)
+        const data = await getPortfolio()
+        if (cancelled) return
+        if (data.tenant_name) setTenantName(data.tenant_name)
+        if (data.total_loans != null) setActiveMembersCount(data.total_loans)
+        if (data.total_disbursed != null) setTotalOutstandingLoans(parseFloat(data.total_disbursed))
+        if (data.npl_rate != null) {
+          const defaultedCount = Math.round((data.npl_rate || 0) * (data.total_loans || 0))
+          setTotalDefaultedCount(defaultedCount)
+        }
+        if (data.loan_status_breakdown) {
+          const sb = data.loan_status_breakdown
+          if (sb.defaulted != null) setTotalDefaultedCount(sb.defaulted)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to fetch portfolio:', err)
+          setPortfolioError('Gagal memuat data portofolio. Menggunakan data sementara.')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    fetchPortfolio()
+    return () => { cancelled = true }
+  }, [])
 
   const highRiskLoans = [
     { id: 'LN-2026-004A', memberName: 'Slamet Rahardjo', pd: 78.4, status: 'approved', deficitMonth: 'Juli 2026' },
@@ -137,6 +171,19 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 text-slate-800 dark:text-slate-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
+
+        {loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-400 text-xs font-semibold">
+            <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+            Memuat data portofolio dari server...
+          </div>
+        )}
+        {portfolioError && !loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+            <TriangleAlert className="w-4 h-4" />
+            {portfolioError}
+          </div>
+        )}
 
         
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">

@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, Shield, ArrowRight } from 'lucide-react';
 import PasswordInput from '@/components/auth/PasswordInput';
-import { authService } from '@/services/authService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ExternalLogin() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -19,10 +20,19 @@ export default function ExternalLogin() {
     setSubmitting(true);
     setError('');
     try {
-      await authService.login(email, password);
-      navigate('/investor');
+      const result = await login(email, password);
+      const role = result?.user?.role;
+      if (role === 'auditor') {
+        navigate('/transactions');
+      } else {
+        navigate('/investor');
+      }
     } catch (err) {
-      const msg = err.response?.data?.detail || err.response?.data?.error || 'Login gagal. Periksa email dan password Anda.';
+      const resData = err.response?.data;
+      const msg = resData?.non_field_errors?.[0]
+        || resData?.detail
+        || resData?.error
+        || 'Login gagal. Periksa email dan password Anda.';
       setError(msg);
     } finally {
       setSubmitting(false);

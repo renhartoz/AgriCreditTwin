@@ -12,7 +12,8 @@ import {
   AlertCircle,
   HelpCircle,
   ChevronDown,
-  Info
+  Info,
+  Search
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -26,6 +27,7 @@ import {
   Legend,
   ReferenceLine
 } from 'recharts'
+import { getTrustScore } from '../services/simulationService.js'
 
 const COMMODITY_PRICES = {
   'Rice': 6500000,
@@ -287,6 +289,11 @@ function Simulation() {
 
   const [isSimulating, setIsSimulating] = useState(false)
 
+  const [nikInput, setNikInput] = useState('')
+  const [trustScoreData, setTrustScoreData] = useState(null)
+  const [trustScoreLoading, setTrustScoreLoading] = useState(false)
+  const [trustScoreError, setTrustScoreError] = useState('')
+
   const amtParam = searchParams.get('amount')
   const [prevAmtParam, setPrevAmtParam] = useState(amtParam)
   if (amtParam !== prevAmtParam) {
@@ -338,6 +345,25 @@ function Simulation() {
     setFarmingCost(500000)
     setHasRun(false)
     setSimResults(null)
+  }
+
+  const fetchTrustScore = async () => {
+    if (!nikInput.trim()) {
+      setTrustScoreError('NIK wajib diisi.')
+      return
+    }
+    setTrustScoreLoading(true)
+    setTrustScoreError('')
+    setTrustScoreData(null)
+    try {
+      const result = await getTrustScore(nikInput.trim())
+      setTrustScoreData(result)
+    } catch (err) {
+      console.error('Trust score fetch failed:', err)
+      setTrustScoreError('Gagal memuat skor kepercayaan. Pastikan NIK terdaftar.')
+    } finally {
+      setTrustScoreLoading(false)
+    }
   }
 
   const runStochasticSimulation = () => {
@@ -595,6 +621,72 @@ function Simulation() {
                   <span className="text-[10px] text-slate-400 dark:text-slate-500">Maksimal 15 digit</span>
                 </div>
               </div>
+            </div>
+
+            
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
+              <div className="flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <h2 className="font-bold text-slate-900 dark:text-slate-100 text-lg">
+                  Skor Kepercayaan Petani (Trust Score)
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                Masukkan NIK petani untuk melihat riwayat kredit lintas koperasi.
+              </p>
+              <div className="flex gap-3">
+                <div className="relative flex-1 rounded-xl border border-slate-200 dark:border-slate-700/80 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all bg-slate-50/50 dark:bg-slate-950/40">
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 bg-transparent text-slate-950 dark:text-slate-100 font-semibold focus:outline-none text-sm"
+                    placeholder="Masukkan NIK (contoh: 3201010101900001)"
+                    value={nikInput}
+                    onChange={(e) => setNikInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') fetchTrustScore() }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchTrustScore}
+                  disabled={trustScoreLoading}
+                  className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-2 disabled:opacity-50 cursor-pointer transition-all text-sm"
+                >
+                  {trustScoreLoading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Search className="w-4 h-4" />
+                  )}
+                  Cek Skor
+                </button>
+              </div>
+              {trustScoreError && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 font-semibold">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {trustScoreError}
+                </div>
+              )}
+              {trustScoreData && (
+                <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/40 dark:from-emerald-950/20 dark:to-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/40 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600/80 dark:text-emerald-400">Trust Score</span>
+                    <span className={`text-2xl font-extrabold ${
+                      trustScoreData.trust_score >= 70 ? 'text-emerald-700 dark:text-emerald-400' :
+                      trustScoreData.trust_score >= 40 ? 'text-amber-600 dark:text-amber-400' :
+                      'text-rose-600 dark:text-rose-400'
+                    }`}>
+                      {trustScoreData.trust_score}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500 dark:text-slate-400">Bulan Tunggakan</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{trustScoreData.months_in_arrears ?? 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500 dark:text-slate-400">Koperasi Terdaftar</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{trustScoreData.tenants_checked ?? 0}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             

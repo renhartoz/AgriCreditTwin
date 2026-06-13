@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   TrendingUp,
   ShieldCheck,
@@ -11,7 +11,8 @@ import {
   FileSpreadsheet,
   Activity,
   ArrowUpRight,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  AlertCircle
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -29,6 +30,7 @@ import {
   CartesianGrid,
   Tooltip
 } from 'recharts'
+import { getPortfolio } from '../services/analyticsService.js'
 
 
 const COOPERATIVES_DATA = {
@@ -532,10 +534,40 @@ const FinancialTooltip = ({ active, payload, label }) => {
 function Analytics() {
   const [selectedKey, setSelectedKey] = useState('ALL')
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [portfolioData, setPortfolioData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchPortfolio() {
+      try {
+        setLoading(true)
+        const data = await getPortfolio()
+        if (cancelled) return
+        setPortfolioData(data)
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to fetch portfolio:', err)
+          setFetchError('Gagal memuat data portofolio. Menggunakan data sementara.')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    fetchPortfolio()
+    return () => { cancelled = true }
+  }, [])
 
   const activeData = useMemo(() => {
-    return COOPERATIVES_DATA[selectedKey]
-  }, [selectedKey])
+    const base = COOPERATIVES_DATA[selectedKey]
+    if (!portfolioData) return base
+    return {
+      ...base,
+      totalDisbursed: portfolioData.total_disbursed ? parseFloat(portfolioData.total_disbursed) : base.totalDisbursed,
+      repaymentRate: portfolioData.npl_rate != null ? ((1 - portfolioData.npl_rate) * 100) : base.repaymentRate,
+    }
+  }, [selectedKey, portfolioData])
 
   
   const calculatedInventoryValuation = useMemo(() => {
@@ -567,6 +599,19 @@ function Analytics() {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-200 animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
+
+        {loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-400 text-xs font-semibold">
+            <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+            Memuat data portofolio dari server...
+          </div>
+        )}
+        {fetchError && !loading && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+            <AlertCircle className="w-4 h-4" />
+            {fetchError}
+          </div>
+        )}
 
         
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
