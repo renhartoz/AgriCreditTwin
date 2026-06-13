@@ -108,6 +108,12 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 MEDIA_URL = f"https://res.cloudinary.com/{env('CLOUDINARY_CLOUD_NAME', default='do5ni0oje')}/raw/upload/"
 MEDIA_ROOT = BASE_DIR / "media"
 
