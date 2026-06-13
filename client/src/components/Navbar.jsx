@@ -6,13 +6,15 @@ import {
   LayoutDashboard,
   SearchAlert,
   TriangleAlert,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileNavbar from "./MobileNavbar";
 
 function Navbar() {
   const user = true;
-  const role = "auditor";
+  const role = "cooperative";
+  const isAdmin = true
   
   const location = useLocation();
 
@@ -36,7 +38,7 @@ function Navbar() {
           <div className="hidden md:flex items-center space-x-4 items-center">
             {user ? (
               <>
-                <NavLinks role={role} currentPath={location.pathname}/>
+                <NavLinks role={role} currentPath={location.pathname} isAdmin={isAdmin}/>
                 <span className="text-sm text-muted-foreground">
                   {user.username}
                 </span>
@@ -85,7 +87,7 @@ function Navbar() {
               </>
             )}
           </div>
-          <MobileNavbar user={user} role={role} />
+          <MobileNavbar user={user} role={role} isAdmin={isAdmin} />
         </div>
       </div>
     </nav>
@@ -101,7 +103,7 @@ const navLinkClass = (path, currentPath) => {
 };
 
 
-const NavLinks = ({ role, currentPath }) => {
+const NavLinks = ({ role, currentPath,isAdmin }) => {
   return (
     <>
       {role == "cooperative" && (
@@ -130,6 +132,12 @@ const NavLinks = ({ role, currentPath }) => {
         <Link to="/analytics" className={navLinkClass('/analytics', currentPath)}>
           <ChartNoAxesCombined className="w-4 h-4" />
           <span className="hidden lg:inline">Analytics</span>
+        </Link>
+      )}
+      {(role == "cooperative" && isAdmin) && (
+        <Link to="/invite-operator" className={navLinkClass('/invite-operator', currentPath)}>
+          <UserPlus className="w-4 h-4" />
+          <span className="hidden lg:inline">Kelola Tim</span>
         </Link>
       )}
       {role == "auditor" && (

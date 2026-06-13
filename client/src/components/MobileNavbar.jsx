@@ -6,6 +6,7 @@ import {
   HardDriveDownload,
   ChartNoAxesCombined,
   SearchAlert,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +19,7 @@ import {
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-function MobileNavbar({ role = "auditor", user = true }) {
+function MobileNavbar({ role = "auditor", user = true, isAdmin = false }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const loading = false;
 
@@ -96,6 +97,19 @@ function MobileNavbar({ role = "auditor", user = true }) {
                     <Link to="/analytics" onClick={() => setShowMobileMenu(false)}>
                       <ChartNoAxesCombined className="w-4 h-4" />
                       Analytics
+                    </Link>
+                  </Button>
+                )}
+
+                {(role === "cooperative" && isAdmin) && (
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                    asChild
+                  >
+                    <Link to="/invite-operator" onClick={() => setShowMobileMenu(false)}>
+                      <UserPlus className="w-4 h-4" />
+                      Kelola Tim
                     </Link>
                   </Button>
                 )}

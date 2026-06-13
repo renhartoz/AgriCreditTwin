@@ -8,6 +8,7 @@ import DataEntry from './pages/DataEntry'
 import RiskDashboard from './pages/RiskDashboard'
 import Analytics from './pages/Analytics'
 import Transactions from './pages/Transactions'
+import InviteOperator from './pages/InviteOperator'
 
 
 import AuthLayout from './layouts/AuthLayout'
@@ -47,6 +48,7 @@ function App() {
               <Route path="/risk" element={<RiskDashboard />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/transactions" element={<Transactions />} />
+              <Route path="/invite-operator" element={<InviteOperator />} />
             </Routes>
           </>
         } />
