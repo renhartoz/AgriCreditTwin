@@ -14,9 +14,10 @@ import MobileNavbar from "./MobileNavbar";
 
 function Navbar() {
   const user = true;
-  const role = "cooperative";
+  const role = "auditor";
   // cooperative
   // investor
+  // auditor
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -89,7 +90,7 @@ function Navbar() {
               </>
             )}
           </div>
-          <MobileNavbar />
+          <MobileNavbar user={user} role={role} />
         </div>
       </div>
     </nav>
@@ -134,6 +135,12 @@ const NavLinks = ({ role, currentPath }) => {
         <Link to="/analytics" className={navLinkClass('/analytics', currentPath)}>
           <ChartNoAxesCombined className="w-4 h-4" />
           <span className="hidden lg:inline">Analytics</span>
+        </Link>
+      )}
+      {role == "auditor" && (
+        <Link to="/transactions" className={navLinkClass('/transactions', currentPath)}>
+          <SearchAlert className="w-4 h-4" />
+          <span className="hidden lg:inline">Transactions</span>
         </Link>
       )}
     </>

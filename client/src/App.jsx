@@ -9,6 +9,7 @@ import Simulation from './pages/Simulation'
 import DataEntry from './pages/DataEntry'
 import RiskDashboard from './pages/RiskDashboard'
 import Analytics from './pages/Analytics'
+import Transactions from './pages/Transactions'
 
 // Auth pages
 import AuthLayout from './layouts/AuthLayout'
@@ -47,6 +48,7 @@ function App() {
               <Route path="/data-entry" element={<DataEntry />} />
               <Route path="/risk" element={<RiskDashboard />} />
               <Route path="/analytics" element={<Analytics />} />
+              <Route path="/transactions" element={<Transactions />} />
             </Routes>
           </>
         } />

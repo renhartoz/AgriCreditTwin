@@ -1,4 +1,12 @@
-import { Briefcase, MenuIcon, SearchAlert, Users } from "lucide-react";
+import {
+  MenuIcon,
+  LayoutDashboard,
+  FastForward,
+  TriangleAlert,
+  HardDriveDownload,
+  ChartNoAxesCombined,
+  SearchAlert,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -10,12 +18,10 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-function MobileNavbar() {
+function MobileNavbar({ role = "auditor", user = true }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const user = true
-  const loading = false
+  const loading = false;
   const navigate = useNavigate();
-
 
   if (loading) return null;
 
@@ -32,65 +38,128 @@ function MobileNavbar() {
             <SheetTitle>Menu</SheetTitle>
           </SheetHeader>
           <nav className="flex flex-col space-y-4 mt-6">
-            <Button
-              variant="ghost"
-              className="flex items-center gap-3 justify-start"
-              asChild
-            >
-              <Link to="/jobs" onClick={() => setShowMobileMenu(false)}>
-                <Briefcase className="w-4 h-4" />
-                Jobs
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex items-center gap-3 justify-start"
-              asChild
-            >
-              <Link to="/community" onClick={() => setShowMobileMenu(false)}>
-                <Users className="w-4 h-4" />
-                Community
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex items-center gap-3 justify-start"
-              asChild
-            >
-              <Link to="/jobs" onClick={() => setShowMobileMenu(false)}>
-                <Briefcase className="w-4 h-4" />
-                Jobs
-              </Link>
-            </Button>
             {user ? (
               <>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-3 justify-start"
-                  asChild
-                >
-                  <Link to="/test" onClick={() => setShowMobileMenu(false)}>
-                    <SearchAlert className="w-4 h-4" />
-                    Test
-                  </Link>
-                </Button>
-
-                <div className="flex items-center justify-center">
+                {role === "cooperative" && (
                   <Button
-                    className="min-w-[100px] cursor-pointer"
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                    asChild
                   >
+                    <Link to="/dashboard" onClick={() => setShowMobileMenu(false)}>
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                )}
+                
+                {role === "cooperative" ? (
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                    asChild
+                  >
+                    <Link to="/simulation" onClick={() => setShowMobileMenu(false)}>
+                      <FastForward className="w-4 h-4" />
+                      Simulation
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                    asChild
+                  >
+                    <Link to="/risk" onClick={() => setShowMobileMenu(false)}>
+                      <TriangleAlert className="w-4 h-4" />
+                      Risk Projection
+                    </Link>
+                  </Button>
+                )}
+
+                {role === "cooperative" ? (
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                    asChild
+                  >
+                    <Link to="/data-entry" onClick={() => setShowMobileMenu(false)}>
+                      <HardDriveDownload className="w-4 h-4" />
+                      Data Entry
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                    asChild
+                  >
+                    <Link to="/analytics" onClick={() => setShowMobileMenu(false)}>
+                      <ChartNoAxesCombined className="w-4 h-4" />
+                      Analytics
+                    </Link>
+                  </Button>
+                )}
+
+                {role === "auditor" && (
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                    asChild
+                  >
+                    <Link to="/transactions" onClick={() => setShowMobileMenu(false)}>
+                      <SearchAlert className="w-4 h-4" />
+                      Transactions
+                    </Link>
+                  </Button>
+                )}
+
+                <div className="flex items-center justify-center pt-4">
+                  <Button className="min-w-[100px] cursor-pointer hover:opacity-90 bg-[#7FFF00] text-black font-semibold">
                     Logout
                   </Button>
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center">
-                <Button className="min-w-[100px] cursor-pointer" asChild>
+              <>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                  asChild
+                >
                   <Link to="/login" onClick={() => setShowMobileMenu(false)}>
-                    Login
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
                   </Link>
                 </Button>
-              </div>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                  asChild
+                >
+                  <Link to="/login" onClick={() => setShowMobileMenu(false)}>
+                    <FastForward className="w-4 h-4" />
+                    Simulation
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 justify-start w-full text-muted-foreground hover:text-foreground hover:bg-muted font-medium text-sm transition-colors"
+                  asChild
+                >
+                  <Link to="/login" onClick={() => setShowMobileMenu(false)}>
+                    <HardDriveDownload className="w-4 h-4" />
+                    Data Entry
+                  </Link>
+                </Button>
+                <div className="flex items-center justify-center pt-4">
+                  <Button className="min-w-[100px] cursor-pointer hover:opacity-90 bg-[#7FFF00] text-black font-semibold" asChild>
+                    <Link to="/login" onClick={() => setShowMobileMenu(false)}>
+                      Login
+                    </Link>
+                  </Button>
+                </div>
+              </>
             )}
           </nav>
         </SheetContent>
